@@ -81,19 +81,40 @@ export default function UsersPage() {
   }
 
   async function createUser() {
-    const res = await fetch("/api/users/create", {
+   const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    alert("Not authenticated");
+    return;
+  }
+
+  const res = await fetch(
+    "/api/users/create",
+    {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type":
+          "application/json",
+        "x-user-id": user.id,
+      },
       body: JSON.stringify({
         username: newUsername,
         password: newPassword,
         full_name: newFullName,
         role: newRole,
       }),
-    });
+    }
+  );
 
-    const result = await res.json();
-    if (!res.ok) return alert(result.error);
+  const result =
+    await res.json();
+
+  if (!res.ok) {
+    alert(result.error);
+    return;
+  }
 
     setIsOpen(false);
     fetchUsers();
@@ -131,23 +152,41 @@ export default function UsersPage() {
 
   // RESET PASSWORD
   async function handleResetPassword() {
-    if (!passwordUser) return;
+   if (!passwordUser) return;
 
-    const res = await fetch("/api/users/reset-password", {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    alert("Not authenticated");
+    return;
+  }
+
+  const res = await fetch(
+    "/api/users/reset-password",
+    {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type":
+          "application/json",
+        "x-user-id": user.id,
+      },
       body: JSON.stringify({
         userId: passwordUser.id,
-        password: newPasswordValue,
+        password:
+          newPasswordValue,
       }),
-    });
-
-    const result = await res.json();
-
-    if (!res.ok) {
-      alert(result.error);
-      return;
     }
+  );
+
+  const result =
+    await res.json();
+
+  if (!res.ok) {
+    alert(result.error);
+    return;
+  }
 
     setPasswordModalOpen(false);
     setPasswordUser(null);

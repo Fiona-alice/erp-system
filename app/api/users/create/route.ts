@@ -5,6 +5,48 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    const currentUserId =
+      req.headers.get("x-user-id");
+
+    if (!currentUserId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // VERIFY CALLER IS ADMIN
+    const {
+      data: currentUser,
+      error: currentUserError,
+    } = await supabaseAdmin
+      .from("user_profiles")
+      .select("role, business_id")
+      .eq("id", currentUserId)
+      .single();
+
+    if (
+      currentUserError ||
+      !currentUser
+    ) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    if (
+      currentUser.role !== "admin"
+    ) {
+      return NextResponse.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
+
+    const business_id =
+      currentUser.business_id;
+
     const {
       username,
       password,
@@ -12,80 +54,119 @@ export async function POST(req: Request) {
       role,
     } = body;
 
-    if (!username || !password || !role) {
+    if (
+      !username ||
+      !password ||
+      !role
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        {
+          error:
+            "Missing required fields",
+        },
         { status: 400 }
       );
     }
 
-    // 1. Normalize email (IMPORTANT FIX)
-    // You MUST always login with same pattern
-    const email = `${username.trim().toLowerCase()}@local.app`;
+    // NORMALIZE LOGIN EMAIL
+    const email =
+      `${username
+        .trim()
+        .toLowerCase()}@local.app`;
 
-    // 2. Check if user already exists in auth
-    const { data: existingUsers } =
+    // CHECK IF USER EXISTS
+    const {
+      data: existingUsers,
+    } =
       await supabaseAdmin.auth.admin.listUsers();
 
-    const userExists = existingUsers.users.find(
-      (u) => u.email === email
-    );
+    const userExists =
+      existingUsers.users.find(
+        (u) => u.email === email
+      );
 
     if (userExists) {
       return NextResponse.json(
-        { error: "User already exists" },
+        {
+          error:
+            "User already exists",
+        },
         { status: 400 }
       );
     }
 
-    // 3. Create auth user
-    const { data: authUser, error: authError } =
-      await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
+    // CREATE AUTH USER
+    const {
+      data: authUser,
+      error: authError,
+    } =
+      await supabaseAdmin.auth.admin.createUser(
+        {
+          email,
+          password,
+          email_confirm: true,
+        }
+      );
 
-    if (authError || !authUser.user) {
+    if (
+      authError ||
+      !authUser.user
+    ) {
       return NextResponse.json(
-        { error: authError?.message || "Auth creation failed" },
+        {
+          error:
+            authError?.message ||
+            "Auth creation failed",
+        },
         { status: 400 }
       );
     }
 
-    // 4. Create profile (linked by auth user ID)
-    const { error: profileError } =
-      await supabaseAdmin.from("user_profiles").insert([
+    // CREATE PROFILE
+    const {
+      error: profileError,
+    } = await supabaseAdmin
+      .from("user_profiles")
+      .insert([
         {
           id: authUser.user.id,
           username,
-          full_name: full_name || "",
+          full_name:
+            full_name || "",
           role,
           active: true,
+          business_id,
         },
       ]);
 
+    // ROLLBACK IF PROFILE FAILS
     if (profileError) {
-      // rollback auth user if profile fails (VERY IMPORTANT)
       await supabaseAdmin.auth.admin.deleteUser(
         authUser.user.id
       );
 
       return NextResponse.json(
-        { error: profileError.message },
+        {
+          error:
+            profileError.message,
+        },
         { status: 400 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      user_id: authUser.user.id,
+      user_id:
+        authUser.user.id,
     });
   } catch (err) {
     console.error(err);
 
     return NextResponse.json(
-      { error: "Unexpected server error" },
+      {
+        error:
+          "Unexpected server error",
+      },
       { status: 500 }
     );
   }
