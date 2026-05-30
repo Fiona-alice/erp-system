@@ -1,0 +1,126 @@
+import Link from "next/link";
+
+const reports = [
+  {
+    name: "Sales Report",
+    href: "/dashboard/reports/sales",
+    type: "Sales",
+    description:
+      "View sales transactions, revenue, quantities sold and profit.",
+  },
+
+  {
+    name: "Purchase Report",
+    href:
+      "/dashboard/reports/purchases",
+    type: "Purchases",
+    description:
+      "View supplier purchases, stock received and purchase costs.",
+  },
+
+  {
+    name: "Inventory Report",
+    href:
+      "/dashboard/reports/inventory",
+    type: "Inventory",
+    description:
+      "View stock levels, inventory value and low stock products.",
+  },
+
+  {
+    name: "Expense Report",
+    href:
+      "/dashboard/reports/expenses",
+    type: "Expenses",
+    description:
+      "View expenses by category, date and expense trends.",
+  },
+  
+  {
+    name: "Low Stock Report",
+    href:
+      "/dashboard/reports/low-stock",
+    type: "Inventory",
+    description:
+      "View low stocks of the different products.",
+  },
+
+  {
+    name: "Profit & Loss",
+    href:
+      "/dashboard/reports/profit-loss",
+    type: "Finance",
+    description:
+      "View revenue, expenses, gross profit and net profit.",
+  },
+];
+
+export default function ReportsPage() {
+  return (
+    <div>
+      {/* HEADER */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-blue-900">
+          Reports
+        </h1>
+
+        <p className="text-gray-500 mt-1">
+          Business reporting
+          center
+        </p>
+      </div>
+
+      {/* TABLE */}
+      <div className="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
+        <table className="w-full text-sm border-collapse">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="text-left p-3 border border-gray-200">
+                Report Name
+              </th>
+
+              <th className="text-left p-3 border border-gray-200">
+                Type
+              </th>
+
+              <th className="text-left p-3 border border-gray-200">
+                Description
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {reports.map((report) => (
+              <tr
+                key={report.name}
+                className="border-t hover:bg-gray-50"
+              >
+                {/* LINK */}
+                <td className="p-3 border border-gray-200">
+                  <Link
+                    href={report.href}
+                    className="text-blue-700 hover:underline font-medium"
+                  >
+                    {report.name}
+                  </Link>
+                </td>
+
+                {/* TYPE */}
+                <td className="p-3 text-gray-600 border border-gray-200">
+                  {report.type}
+                </td>
+
+                {/* DESCRIPTION */}
+                <td className="p-3 text-gray-500 border border-gray-200">
+                  {
+                    report.description
+                  }
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
