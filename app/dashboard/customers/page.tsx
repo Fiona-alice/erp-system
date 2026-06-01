@@ -51,12 +51,22 @@ export default function CustomersPage() {
   const [permissions, setPermissions] =
   useState<any>(null); 
 
+  const [businessId, setBusinessId] = useState<string>("");
+
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }
+
   // FETCH CUSTOMERS
   async function fetchCustomers() {
+    if (!businessId) return;
     const { data, error } =
       await supabase
         .from("customers")
         .select("*")
+        .eq("business_id", businessId) 
         .order("id", {
           ascending: false,
         });
@@ -70,9 +80,15 @@ export default function CustomersPage() {
   }
 
   useEffect(() => {
-    fetchCustomers();
+    loadBusiness();
     loadPermissions();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchCustomers();
+    }
+  }, [businessId]);
 
   async function loadPermissions() {
   try {
@@ -98,8 +114,8 @@ export default function CustomersPage() {
         profileError
       );
       return;
-    }
-
+    } 
+    
     const role = profile.role;
 
     // Get permissions for products page
@@ -202,7 +218,8 @@ export default function CustomersPage() {
         address,
         national_id: nationalId,
       })
-      .eq("id", editingCustomer.id);
+      .eq("id", editingCustomer.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -235,7 +252,8 @@ export default function CustomersPage() {
     const { error } = await supabase
       .from("customers")
       .delete()
-      .eq("id", customer.id);
+      .eq("id", customer.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);

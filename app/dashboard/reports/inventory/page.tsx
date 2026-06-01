@@ -7,17 +7,14 @@ import {
 } from "react";
 
 import Select from "react-select";
-
 import { supabase } from "@/lib/supabase";
-
 import { formatCurrency } from "@/lib/formatCurrency";
-
 import {
   FileText,
   FileSpreadsheet,
 } from "lucide-react";
-
 import * as XLSX from "xlsx";
+import { getBusinessId } from "@/lib/getBusinessId";
 
 type Product = {
   id: number;
@@ -54,8 +51,17 @@ export default function InventoryReportPage() {
     setSelectedCategories,
   ] = useState<OptionType[]>([]);
 
+  const [businessId, setBusinessId] = useState<string>("");
+  
+     // GET BUSINESS ID
+     async function loadBusiness() {
+      const id = await getBusinessId(); 
+      setBusinessId(id);
+    }  
+
   // FETCH PRODUCTS
   async function fetchProducts() {
+    if (!businessId) return;
     const { data, error } =
       await supabase
         .from("products")
@@ -63,6 +69,7 @@ export default function InventoryReportPage() {
           *,
           categories(name)
         `)
+        .eq("business_id", businessId)
         .order("name");
 
     if (error) {
@@ -73,9 +80,15 @@ export default function InventoryReportPage() {
     setProducts(data || []);
   }
 
-  useEffect(() => {
-    fetchProducts();
+ useEffect(() => {
+    loadBusiness();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchProducts();
+    }
+  }, [businessId]);
 
   // CATEGORIES
   const categories = useMemo(() => {

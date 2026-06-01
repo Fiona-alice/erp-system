@@ -87,8 +87,18 @@ export default function StockAdjustmentPage() {
   const [reason, setReason] =
     useState("");
 
+  const [businessId, setBusinessId] = useState<string>("");
+
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }  
+
   // FETCH PRODUCTS
   async function fetchProducts() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("products")
@@ -98,6 +108,7 @@ export default function StockAdjustmentPage() {
           stock_quantity,
           buying_price
         `)
+        .eq("business_id", businessId) 
         .order("name");
 
     if (error) {
@@ -112,6 +123,8 @@ export default function StockAdjustmentPage() {
 
   // FETCH ADJUSTMENTS
   async function fetchAdjustments() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("stock_adjustments")
@@ -119,6 +132,7 @@ export default function StockAdjustmentPage() {
           *,
           products(name)
         `)
+        .eq("business_id", businessId)
         .order("created_at", {
           ascending: false,
         });
@@ -133,10 +147,16 @@ export default function StockAdjustmentPage() {
     );
   }
 
-  useEffect(() => {
-    fetchProducts();
-    fetchAdjustments();
+   useEffect(() => {
+    loadBusiness();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchProducts();
+      fetchAdjustments();
+    }
+  }, [businessId]);
 
   // AUTO UNIT COST
   useEffect(() => {
@@ -277,7 +297,8 @@ export default function StockAdjustmentPage() {
            : total,
           reason,
           })
-        .eq("id", editingAdjustment.id);
+        .eq("id", editingAdjustment.id)
+        .eq("business_id", businessId);
 
       if (error) {
         console.error(error);
@@ -292,7 +313,8 @@ export default function StockAdjustmentPage() {
           .update({
             stock_quantity: finalStock,
           })
-          .eq("id", product.id);
+          .eq("id", product.id)
+          .eq("business_id", businessId);
 
       if (stockError) {
         console.error(stockError);
@@ -347,7 +369,8 @@ export default function StockAdjustmentPage() {
           .update({
             stock_quantity: newStock,
           })
-          .eq("id", product.id);
+          .eq("id", product.id)
+          .eq("business_id", businessId);
 
       if (stockError) {
         console.error(stockError);
@@ -404,7 +427,8 @@ export default function StockAdjustmentPage() {
         .update({
           stock_quantity: reversedStock,
         })
-        .eq("id", product.id);
+        .eq("id", product.id)
+        .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -415,7 +439,8 @@ export default function StockAdjustmentPage() {
     const { error } = await supabase
       .from("stock_adjustments")
       .delete()
-      .eq("id", adjustment.id);
+      .eq("id", adjustment.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);

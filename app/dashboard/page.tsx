@@ -15,7 +15,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-
+import { getBusinessId } from "@/lib/getBusinessId";
 import { supabase } from "@/lib/supabase";
 
 import {
@@ -46,6 +46,9 @@ type Product = {
 
 export default function DashboardPage() {
 
+  const [businessId, setBusinessId] =
+  useState<string>("");
+  
   const [roleLoading, setRoleLoading] =
   useState(true);
 
@@ -106,11 +109,12 @@ export default function DashboardPage() {
  
 
   // FETCH SALES
-  async function fetchSales() {
+  async function fetchSales( businessId: string) {
     const { data, error } =
       await supabase
         .from("sales")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -121,11 +125,12 @@ export default function DashboardPage() {
   }
 
   // FETCH EXPENSES
-  async function fetchExpenses() {
+  async function fetchExpenses( businessId: string) {
     const { data, error } =
       await supabase
         .from("expenses")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -136,11 +141,12 @@ export default function DashboardPage() {
   }
 
   // FETCH RENTALS
-  async function fetchRentals() {
+  async function fetchRentals( businessId: string) {
     const { data, error } =
       await supabase
         .from("rentals")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -151,11 +157,12 @@ export default function DashboardPage() {
   }
 
   // FETCH PRODUCTS
-  async function fetchProducts() {
+  async function fetchProducts( businessId: string) {
     const { data, error } =
       await supabase
         .from("products")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -165,15 +172,21 @@ export default function DashboardPage() {
     setProducts(data || []);
   }
 
-  useEffect(() => {
-    fetchSales();
+ useEffect(() => {
+  async function loadData() {
+    const id = await getBusinessId();
 
-    fetchExpenses();
+    if (!id) return;
 
-    fetchRentals();
+    setBusinessId(id);
 
-    fetchProducts();
-  }, []);
+    fetchSales(id);
+    fetchExpenses(id);
+    fetchRentals(id);
+    fetchProducts(id);
+  }
+  loadData();
+}, []);
 
   // FILTER SALES
   const filteredSales =

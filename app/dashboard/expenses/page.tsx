@@ -8,18 +8,13 @@ import { formatDate } from "@/lib/formatDate";
 import { getBusinessId } from "@/lib/getBusinessId";
 
 type Expense = {
+
   id: number;
-
   title: string;
-
   category: string;
-
   amount: number;
-
   notes: string;
-
   expense_date: string;
-
   created_at: string;
 };
 
@@ -36,31 +31,36 @@ export default function ExpensesPage() {
   const [isOpen, setIsOpen] =
     useState(false);
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
 
   // FORM STATES
-  const [title, setTitle] =
-    useState("");
+  const [title, setTitle] = useState("");
 
-  const [category, setCategory] =
-    useState("");
+  const [category, setCategory] = useState("");
 
-  const [amount, setAmount] =
-    useState("");
+  const [amount, setAmount] = useState("");
 
-  const [notes, setNotes] =
-    useState("");
+  const [notes, setNotes] = useState("");
 
-  const [expenseDate, setExpenseDate] =
-    useState("");
+  const [expenseDate, setExpenseDate] = useState("");
+
+  const [businessId, setBusinessId] = useState<string>("");
+
+  // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }
 
   // FETCH EXPENSES
   async function fetchExpenses() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("expenses")
         .select("*")
+        .eq("business_id", businessId)
         .order("id", {
           ascending: false,
         });
@@ -73,10 +73,15 @@ export default function ExpensesPage() {
 
     setExpenses(data || []);
   }
+ useEffect(() => {
+    loadBusiness();
+  }, []);
 
   useEffect(() => {
-    fetchExpenses();
-  }, []);
+    if (businessId) {
+      fetchExpenses();
+    }
+  }, [businessId]);
 
   // CLEAR FORM
   function clearForm() {
@@ -178,7 +183,8 @@ export default function ExpensesPage() {
 
         expense_date: expenseDate,
       })
-      .eq("id", editingExpense.id);
+      .eq("id", editingExpense.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -210,7 +216,8 @@ export default function ExpensesPage() {
     const { error } = await supabase
       .from("expenses")
       .delete()
-      .eq("id", expense.id);
+      .eq("id", expense.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);

@@ -19,15 +19,10 @@ type Purchase = {
   id: number;
   product_id: number;
   quantity: number;
-
   buying_price: number;
-
   total_amount: number;
-
   purchase_date: string;
-
   created_at: string;
-
   products: {
     name: string;
   };
@@ -73,16 +68,25 @@ export default function PurchasesPage() {
 
   const [purchaseDate, setPurchaseDate] =
     useState("");
+  
+  const [businessId, setBusinessId] = useState<string>("");
 
-  /*
-    FETCH PRODUCTS
-  */
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }
+
+  /* FETCH PRODUCTS */
 
   async function fetchProducts() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("products")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -92,11 +96,11 @@ export default function PurchasesPage() {
     setProducts(data || []);
   }
 
-  /*
-    FETCH PURCHASES
-  */
+  /* FETCH PURCHASES */
 
   async function fetchPurchases() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("purchases")
@@ -104,6 +108,7 @@ export default function PurchasesPage() {
           *,
           products(name)
         `)
+        .eq("business_id", businessId) 
         .order("id", {
           ascending: false,
         });
@@ -117,25 +122,25 @@ export default function PurchasesPage() {
   }
 
   useEffect(() => {
-    fetchProducts();
-    fetchPurchases();
+    loadBusiness();
   }, []);
 
-  /*
-    CLEAR FORM
-  */
+  useEffect(() => {
+    if (businessId) {
+      fetchProducts();
+      fetchPurchases();
+    }
+  }, [businessId]);
+
+
+  /*  CLEAR FORM*/
 
   function clearForm() {
     setSelectedProduct("");
-
     setQuantity("");
-
     setInvoiceAmount("");
-
     setShippingCost("");
-
     setOtherCost("");
-
     setPurchaseDate("");
   }
 
@@ -188,17 +193,13 @@ export default function PurchasesPage() {
       product.stock_quantity *
       product.buying_price;
 
-    /*
-      NEW STOCK
-    */
+    /* NEW STOCK */
 
     const newStock =
       product.stock_quantity +
       qty;
 
-    /*
-      NEW AVG COST
-    */
+    /* NEW AVG COST */
 
     const newAverageCost =
       (
@@ -206,9 +207,7 @@ export default function PurchasesPage() {
         total
       ) / newStock;
 
-    /*
-      SAVE PURCHASE
-    */
+    /* SAVE PURCHASE */
     const businessId = await getBusinessId();
     const { error } =
       await supabase
@@ -246,10 +245,7 @@ export default function PurchasesPage() {
       return;
     }
 
-    /*
-      UPDATE PRODUCT
-    */
-
+    /* UPDATE PRODUCT*/
     const {
       error: updateError,
     } = await supabase
@@ -265,7 +261,8 @@ export default function PurchasesPage() {
             )
           ),
       })
-      .eq("id", product.id);
+      .eq("id", product.id)
+      .eq("business_id", businessId);
 
     if (updateError) {
       console.error(updateError);
@@ -432,7 +429,8 @@ export default function PurchasesPage() {
         .eq(
           "id",
           editingPurchase.id
-        );
+        )
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -463,7 +461,8 @@ export default function PurchasesPage() {
             )
           ),
       })
-      .eq("id", product.id);
+      .eq("id", product.id)
+      .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -524,7 +523,8 @@ export default function PurchasesPage() {
         stock_quantity:
           newStock,
       })
-      .eq("id", product.id);
+      .eq("id", product.id)
+      .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -542,7 +542,8 @@ export default function PurchasesPage() {
         .eq(
           "id",
           purchase.id
-        );
+        )
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);

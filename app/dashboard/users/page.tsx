@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { supabase } from "@/lib/supabase";
+import { getBusinessId } from "@/lib/getBusinessId";
+import { formatDate } from "@/lib/formatDate";
 
 type UserProfile = {
   id: string;
@@ -37,10 +39,21 @@ export default function UsersPage() {
   const [passwordUser, setPasswordUser] = useState<UserProfile | null>(null);
   const [newPasswordValue, setNewPasswordValue] = useState("");
 
+  const [businessId, setBusinessId] = useState<string>("");
+
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }
+
   async function fetchUsers() {
+    if (!businessId) return;
+
     const { data, error } = await supabase
       .from("user_profiles")
       .select("*")
+      .eq("business_id", businessId)
       .order("created_at", { ascending: false });
 
     if (error) return console.error(error);
@@ -48,8 +61,14 @@ export default function UsersPage() {
   }
 
   useEffect(() => {
-    fetchUsers();
+    loadBusiness();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchUsers();
+    }
+  }, [businessId]);
 
   function openPasswordModal(user: UserProfile) {
     setPasswordUser(user);
@@ -130,7 +149,8 @@ export default function UsersPage() {
         full_name: fullName,
         role,
       })
-      .eq("id", selectedUser.id);
+      .eq("id", selectedUser.id)
+      .eq("business_id", businessId);
 
     if (error) return console.error(error);
 
@@ -143,7 +163,8 @@ export default function UsersPage() {
     const { error } = await supabase
       .from("user_profiles")
       .update({ active: !user.active })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .eq("business_id", businessId);
 
     if (error) return console.error(error);
 
@@ -283,7 +304,7 @@ export default function UsersPage() {
                   {user.active ? "Active" : "Inactive"}
                 </td>
                 <td className="p-2 text-gray-700 border border-gray-200">
-                  {new Date(user.created_at).toLocaleDateString()}
+                  {formatDate(user.created_at)}
                 </td>
               </tr>
             ))}
@@ -294,7 +315,9 @@ export default function UsersPage() {
       </div>
 
       {/* CREATE / EDIT MODAL */}
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}
+        className="relative z-50" >
+        
         <div className="fixed inset-0 bg-black/40" />
         <div className="fixed inset-0 flex items-center justify-center">
           <Dialog.Panel className="bg-white p-6 rounded-xl w-full max-w-md">
@@ -362,7 +385,8 @@ export default function UsersPage() {
       {/* PASSWORD RESET MODAL */}
       <Dialog
         open={passwordModalOpen}
-        onClose={() => setPasswordModalOpen(false)}
+        onClose={() => setPasswordModalOpen(false)} 
+        className="relative z-50"
       >
         <div className="fixed inset-0 bg-black/40" />
         <div className="fixed inset-0 flex items-center justify-center">

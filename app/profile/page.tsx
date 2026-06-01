@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { getBusinessId } from "@/lib/getBusinessId";
 
 type UserProfile = {
   id: string;
@@ -31,7 +32,17 @@ export default function ProfilePage() {
   (fullName !== profile.full_name ||
     username !== profile.username);
 
+  const [businessId, setBusinessId] = useState<string>("");
+
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }  
+
   async function fetchProfile() {
+    if (!businessId) return;
+    
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -42,6 +53,7 @@ export default function ProfilePage() {
       .from("user_profiles")
       .select("*")
       .eq("id", user.id)
+      .eq("business_id", businessId) 
       .single();
 
     if (data) {
@@ -51,9 +63,15 @@ export default function ProfilePage() {
     }
   }
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+   useEffect(() => {
+      loadBusiness();
+    }, []);
+  
+    useEffect(() => {
+      if (businessId) {
+        fetchProfile();
+      }
+    }, [businessId]);
 
   async function updateProfile() {
     if (!profile) return;
@@ -66,7 +84,8 @@ export default function ProfilePage() {
         full_name: fullName,
         username,
       })
-      .eq("id", profile.id);
+      .eq("id", profile.id)
+      .eq("business_id", businessId);
 
     setLoading(false);
 

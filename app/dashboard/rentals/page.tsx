@@ -94,12 +94,23 @@ export default function RentalsPage() {
   const [permissions, setPermissions] =
   useState<any>(null);  
 
+  const [businessId, setBusinessId] = useState<string>("");
+
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }
+
   // FETCH CUSTOMERS
   async function fetchCustomers() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("customers")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -111,10 +122,13 @@ export default function RentalsPage() {
 
   // FETCH PRODUCTS
   async function fetchProducts() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("products")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -127,11 +141,14 @@ export default function RentalsPage() {
   // FETCH RENTALS
   async function fetchRentals() {
   // AUTO-MARK LATE (ONCE ONLY)
+  if (!businessId) return;
+
   const { error: updateError } = await supabase
     .from("rentals")
     .update({ status: "late" })
     .lt("return_date", new Date().toISOString())
-    .eq("status", "ongoing");
+    .eq("status", "ongoing")
+    .eq("business_id", businessId);
 
   if (updateError) {
     console.error("Late update error:", updateError);
@@ -145,6 +162,7 @@ export default function RentalsPage() {
       customers(name),
       products(name)
     `)
+    .eq("business_id", businessId)
     .order("id", { ascending: false });
 
   if (error) {
@@ -155,12 +173,18 @@ export default function RentalsPage() {
   setRentals(data || []);
 }
 
-  useEffect(() => {
-    fetchCustomers();
-    fetchProducts();
-    fetchRentals();
-    loadPermissions();
-  }, []);
+ useEffect(() => {
+     loadBusiness();
+     loadPermissions();
+   }, []);
+ 
+   useEffect(() => {
+     if (businessId) {
+       fetchProducts();
+       fetchCustomers();
+       fetchRentals();
+     }
+   }, [businessId]);
 
   async function loadPermissions() {
     try {
@@ -307,7 +331,8 @@ export default function RentalsPage() {
         .update({
           stock_quantity: newStock,
         })
-        .eq("id", product.id);
+        .eq("id", product.id)
+        .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -406,7 +431,8 @@ export default function RentalsPage() {
 
         return_date: returnDate,
       })
-      .eq("id", editingRental.id);
+      .eq("id", editingRental.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -421,7 +447,8 @@ export default function RentalsPage() {
         .update({
           stock_quantity: finalStock,
         })
-        .eq("id", product.id);
+        .eq("id", product.id)
+        .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -479,7 +506,8 @@ export default function RentalsPage() {
           stock_quantity:
             restoredStock,
         })
-        .eq("id", product.id);
+        .eq("id", product.id)
+        .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -491,7 +519,8 @@ export default function RentalsPage() {
     const { error } = await supabase
       .from("rentals")
       .delete()
-      .eq("id", rental.id);
+      .eq("id", rental.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -532,7 +561,8 @@ export default function RentalsPage() {
       .update({
         stock_quantity: restoredStock,
       })
-      .eq("id", product.id);
+      .eq("id", product.id)
+      .eq("business_id", businessId);
 
   if (stockError) {
     console.error(stockError);
@@ -558,7 +588,8 @@ export default function RentalsPage() {
         status,
         actual_return_date: actualDate,
       })
-      .eq("id", rental.id);
+      .eq("id", rental.id)
+      .eq("business_id", businessId);
 
   if (error) {
     console.error(error);

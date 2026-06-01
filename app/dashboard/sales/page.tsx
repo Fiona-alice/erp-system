@@ -10,13 +10,9 @@ import { logStockMovement } from "@/lib/logStockMovement";
 
 type Product = {
   id: number;
-
   name: string;
-
   stock_quantity: number;
-
   buying_price: number;
-
   selling_price: number;
 };
 
@@ -70,12 +66,23 @@ export default function SalesPage() {
   const [permissions, setPermissions] =
   useState<any>(null);
 
+  const [businessId, setBusinessId] = useState<string>("");
+
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }
+
   // FETCH PRODUCTS
   async function fetchProducts() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("products")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId) 
 
     if (error) {
       console.error(error);
@@ -139,6 +146,8 @@ export default function SalesPage() {
 }
   // FETCH SALES
   async function fetchSales() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("sales")
@@ -146,6 +155,7 @@ export default function SalesPage() {
           *,
           products(name)
         `)
+        .eq("business_id", businessId) 
         .order("id", {
           ascending: false,
         });
@@ -158,11 +168,17 @@ export default function SalesPage() {
     setSales(data || []);
   }
 
-  useEffect(() => {
-    fetchProducts();
-    fetchSales();
-    loadPermissions();
-  }, []);
+ useEffect(() => {
+     loadBusiness();
+     loadPermissions();
+   }, []);
+ 
+   useEffect(() => {
+     if (businessId) {
+       fetchProducts();
+       fetchSales();
+     }
+   }, [businessId]);
 
   // CLEAR FORM
   function clearForm() {
@@ -262,7 +278,8 @@ export default function SalesPage() {
         .update({
           stock_quantity: newStock,
         })
-        .eq("id", product.id);
+        .eq("id", product.id)
+        .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -369,7 +386,8 @@ export default function SalesPage() {
 
         sale_date: saleDate,
       })
-      .eq("id", editingSale.id);
+      .eq("id", editingSale.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -386,7 +404,8 @@ export default function SalesPage() {
         .update({
           stock_quantity: finalStock,
         })
-        .eq("id", product.id);
+        .eq("id", product.id)
+        .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -434,7 +453,8 @@ export default function SalesPage() {
           stock_quantity:
             restoredStock,
         })
-        .eq("id", product.id);
+        .eq("id", product.id)
+        .eq("business_id", businessId);
 
     if (stockError) {
       console.error(stockError);
@@ -446,7 +466,8 @@ export default function SalesPage() {
     const { error } = await supabase
       .from("sales")
       .delete()
-      .eq("id", sale.id);
+      .eq("id", sale.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);

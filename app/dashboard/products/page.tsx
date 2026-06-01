@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { formatCurrency, } from "@/lib/formatCurrency";
 import { logAction } from "@/lib/auditLog";
 import StockHistory from "@/components/StockHistory";
+import { getBusinessId } from "@/lib/getBusinessId";
 
 type Product = {
   id: number;
@@ -64,17 +65,28 @@ export default function ProductsPage() {
   const [historyModalOpen, setHistoryModalOpen,] = 
   useState(false);
 
- const [historyProduct, setHistoryProduct,] = 
- useState<Product | null>(null);
+  const [historyProduct, setHistoryProduct,] = 
+  useState<Product | null>(null);
+
+  const [businessId, setBusinessId] = useState<string>("");
+
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId(); 
+    setBusinessId(id);
+  }
 
   // FETCH PRODUCTS
   async function fetchProducts() {
+    if (!businessId) return;
+
     const { data, error } = await supabase
       .from("products")
       .select(`
        *,
     categories(name)
    `)
+      .eq("business_id", businessId) 
       .order("id", { ascending: false });
 
     if (error) {
@@ -86,10 +98,16 @@ export default function ProductsPage() {
   }
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
+    loadBusiness();
     loadPermissions();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchProducts();
+      fetchCategories();
+    }
+  }, [businessId]);
 
   async function loadPermissions() {
   try {
@@ -145,10 +163,13 @@ export default function ProductsPage() {
 }
   // FETCH CATEGORIES
   async function fetchCategories() {
+     if (!businessId) return;
+ 
   const { data, error } =
     await supabase
       .from("categories")
       .select("*")
+      .eq("business_id", businessId) 
       .order("name");
 
   if (error) {
@@ -280,7 +301,8 @@ if (!profile?.business_id) {
         stock_quantity: Number(stockQuantity),
          minimum_stock: Number(minimumStock),
       })
-      .eq("id", editingProduct.id);
+      .eq("id", editingProduct.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -319,11 +341,11 @@ if (!profile?.business_id) {
     );
 
     if (!confirmDelete) return;
-
     const { error } = await supabase
       .from("products")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);

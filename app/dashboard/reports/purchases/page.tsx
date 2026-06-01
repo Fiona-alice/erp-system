@@ -5,21 +5,16 @@ import {
   useMemo,
   useState,
 } from "react";
-
 import Select from "react-select";
-
 import { supabase } from "@/lib/supabase";
-
 import { formatCurrency } from "@/lib/formatCurrency";
-
 import { formatDate } from "@/lib/formatDate";
-
 import {
   FileText,
   FileSpreadsheet,
 } from "lucide-react";
-
 import * as XLSX from "xlsx";
+import { getBusinessId } from "@/lib/getBusinessId";
 
 type Purchase = {
   id: number;
@@ -77,8 +72,18 @@ export default function PurchaseReportPage() {
   const [endDate, setEndDate] =
     useState("");
 
+  const [businessId, setBusinessId] = useState<string>("");
+  
+     // GET BUSINESS ID
+     async function loadBusiness() {
+      const id = await getBusinessId(); 
+      setBusinessId(id);
+    }    
+
   // FETCH PURCHASES
   async function fetchPurchases() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("purchases")
@@ -89,6 +94,7 @@ export default function PurchaseReportPage() {
             categories(name)
           )
         `)
+        .eq("business_id", businessId)
         .order("purchase_date", {
           ascending: false,
         });
@@ -103,11 +109,14 @@ export default function PurchaseReportPage() {
 
   // FETCH PRODUCTS
   async function fetchProducts() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("products")
         .select("id, name")
-        .order("name");
+        .eq("business_id", businessId)
+        .order("name")
 
     if (error) {
       console.error(error);
@@ -118,10 +127,15 @@ export default function PurchaseReportPage() {
   }
 
   useEffect(() => {
-    fetchPurchases();
-    fetchProducts();
+    loadBusiness();
   }, []);
 
+  useEffect(() => {
+    if (businessId) {
+      fetchPurchases();
+      fetchProducts();
+    }
+  }, [businessId]);
   // CATEGORIES
   const categories = useMemo(() => {
     const set = new Set(

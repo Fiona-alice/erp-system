@@ -3,15 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Select from "react-select";
 import * as XLSX from "xlsx";
-
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { formatDate } from "@/lib/formatDate";
-
 import {
   FileText,
   FileSpreadsheet,
 } from "lucide-react";
+import { getBusinessId } from "@/lib/getBusinessId";
 
 type Sale = {
   id: number;
@@ -71,10 +70,18 @@ export default function ProfitLossReportPage() {
   const [endDate, setEndDate] =
     useState("");
 
+  const [businessId, setBusinessId] = useState<string>("");
+  
+     // GET BUSINESS ID
+     async function loadBusiness() {
+      const id = await getBusinessId(); 
+      setBusinessId(id);
+    }    
   // -----------------------------
   // FETCH SALES
   // -----------------------------
   async function fetchSales() {
+    if (!businessId) return;
     const { data, error } =
       await supabase
         .from("sales")
@@ -86,7 +93,8 @@ export default function ProfitLossReportPage() {
           products(
             categories(name)
           )
-        `);
+        `)
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -102,10 +110,13 @@ export default function ProfitLossReportPage() {
   // FETCH EXPENSES
   // -----------------------------
   async function fetchExpenses() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("expenses")
-        .select("*");
+        .select("*")
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -121,6 +132,8 @@ export default function ProfitLossReportPage() {
   // FETCH STOCK ADJUSTMENTS
   // -----------------------------
   async function fetchAdjustments() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("stock_adjustments")
@@ -131,7 +144,8 @@ export default function ProfitLossReportPage() {
           products(
             categories(name)
           )
-        `);
+        `)
+        .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -143,11 +157,17 @@ export default function ProfitLossReportPage() {
     );
   }
 
-  useEffect(() => {
-    fetchSales();
-    fetchExpenses();
-    fetchAdjustments();
+ useEffect(() => {
+    loadBusiness();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchSales();
+      fetchExpenses();
+      fetchAdjustments();
+    }
+  }, [businessId]);
 
   // -----------------------------
   // CATEGORY OPTIONS

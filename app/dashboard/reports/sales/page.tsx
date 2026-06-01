@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { formatDate } from "@/lib/formatDate";
+import { getBusinessId } from "@/lib/getBusinessId";
 
 type Sale = {
   id: number;
@@ -60,8 +61,18 @@ export default function SalesReportPage() {
   const [endDate, setEndDate] =
     useState("");
 
+  const [businessId, setBusinessId] = useState<string>("");
+  
+     // GET BUSINESS ID
+     async function loadBusiness() {
+      const id = await getBusinessId(); 
+      setBusinessId(id);
+    }  
+
   // FETCH SALES
   async function fetchSales() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("sales")
@@ -72,6 +83,7 @@ export default function SalesReportPage() {
             categories(name)
           )
         `)
+        .eq("business_id", businessId)
         .order("sale_date", {
           ascending: false,
         });
@@ -86,10 +98,13 @@ export default function SalesReportPage() {
 
   // FETCH PRODUCTS
   async function fetchProducts() {
+    if (!businessId) return;
+
     const { data, error } =
       await supabase
         .from("products")
         .select("id, name")
+        .eq("business_id", businessId)
         .order("name");
 
     if (error) {
@@ -100,10 +115,16 @@ export default function SalesReportPage() {
     setProducts(data || []);
   }
 
-  useEffect(() => {
-    fetchSales();
-    fetchProducts();
+ useEffect(() => {
+    loadBusiness();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchSales();
+      fetchProducts();
+    }
+  }, [businessId]);
 
   // CATEGORIES
   const categories = useMemo(() => {

@@ -10,6 +10,7 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import * as XLSX from "xlsx";
+import { getBusinessId } from "@/lib/getBusinessId";
 
 type Expense = {
   id: number;
@@ -41,12 +42,23 @@ export default function ExpenseReportPage() {
   const [endDate, setEndDate] =
     useState("");
 
+  const [businessId, setBusinessId] = useState<string>("");
+  
+     // GET BUSINESS ID
+     async function loadBusiness() {
+      const id = await getBusinessId(); 
+      setBusinessId(id);
+    }  
+
   // FETCH EXPENSES
   async function fetchExpenses() {
+    if (!businessId) return;
+    
     const { data, error } =
       await supabase
         .from("expenses")
         .select("*")
+        .eq("business_id", businessId)
         .order("expense_date", {
           ascending: false,
         });
@@ -62,9 +74,15 @@ export default function ExpenseReportPage() {
     );
   }
 
-  useEffect(() => {
-    fetchExpenses();
+ useEffect(() => {
+    loadBusiness();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchExpenses();
+    }
+  }, [businessId]);
 
   // CATEGORY OPTIONS
   const categories = useMemo(() => {

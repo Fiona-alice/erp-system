@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { supabase } from "@/lib/supabase";
 import { getBusinessId } from "@/lib/getBusinessId";
+import { formatDate } from "@/lib/formatDate";
 
 type Category = {
   id: number;
@@ -24,11 +25,23 @@ export default function CategoriesPage() {
   const [selectedRow, setSelectedRow] =
     useState<Category | null>(null);
 
+  const [businessId, setBusinessId] = useState<string>("");  
+
+
+   // GET BUSINESS ID
+   async function loadBusiness() {
+    const id = await getBusinessId();
+    setBusinessId(id);
+  }
+
   // FETCH
   async function fetchCategories() {
+    if (!businessId) return;
+
     const { data, error } = await supabase
       .from("categories")
       .select("*")
+      .eq("business_id", businessId) 
       .order("id", { ascending: false });
 
     if (error) {
@@ -39,9 +52,15 @@ export default function CategoriesPage() {
     setCategories(data || []);
   }
 
-  useEffect(() => {
-    fetchCategories();
+ useEffect(() => {
+    loadBusiness();
   }, []);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchCategories();
+    }
+  }, [businessId]);
 
   // CLEAR FORM
   function clearForm() {
@@ -60,14 +79,14 @@ export default function CategoriesPage() {
       .from("categories")
       .insert([
         {
-           business_id: businessId,
+          business_id: businessId,
           name,
         },
       ]);
 
     if (error) {
       console.error(error);
-      alert("Failed to save category");
+       alert(error.message);
       return;
     }
 
@@ -92,7 +111,8 @@ export default function CategoriesPage() {
       .update({
         name,
       })
-      .eq("id", selectedCategory.id);
+      .eq("id", selectedCategory.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -117,7 +137,8 @@ export default function CategoriesPage() {
     const { error } = await supabase
       .from("categories")
       .delete()
-      .eq("id", category.id);
+      .eq("id", category.id)
+      .eq("business_id", businessId);
 
     if (error) {
       console.error(error);
@@ -181,7 +202,7 @@ export default function CategoriesPage() {
         </td>
 
         <td className="p-2 text-gray-700 border border-gray-200">
-          {new Date(category.created_at).toLocaleDateString()}
+          {formatDate(category.created_at)}
         </td>
 
         <td className="p-2 border border-gray-200">
