@@ -1,11 +1,5 @@
-import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  console.log(process.env.NEXT_PUBLIC_SUPABASE_URL);
-
-  return (
-    <div>
-      ERP System
-    </div>
-  );
+  redirect("/login");
 }
