@@ -84,6 +84,12 @@ export default function LoginPage() {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+
+            onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              login();
+            }
+            }}
             className="w-full border border-gray-300 rounded-md p-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
             
           />
@@ -98,6 +104,12 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+
+             onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                login();
+              }
+              }}
             className="w-full mt-1 border border-gray-300 rounded-md p-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
             
           />

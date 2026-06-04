@@ -1,4 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { getBusinessType } from "@/lib/getBusinessType";
+
+
+export default function ReportsPage() {
+  const [businessType, setBusinessType] =
+  useState("");
+
+useEffect(() => {
+  async function loadBusiness() {
+    const type =
+      await getBusinessType();
+
+    setBusinessType(type);
+  }
+
+  loadBusiness();
+}, []);
+
 
 const reports = [
   {
@@ -17,6 +38,14 @@ const reports = [
     description:
       "View supplier purchases, stock received and purchase costs.",
   },
+
+    {
+        name: "Salon Report",
+        href: "/dashboard/reports/service-sales",
+        type: "Saloon Sales",
+        description:
+          "View Service sales transactions, revenue, quantities sold and profit.",
+      },
 
   {
     name: "Inventory Report",
@@ -55,7 +84,21 @@ const reports = [
   },
 ];
 
-export default function ReportsPage() {
+const filteredReports =
+  reports.filter((report) => {
+    // Hide salon report
+    // for non-salon businesses
+    if (
+      report.href ===
+        "/dashboard/reports/service-sales" &&
+      businessType !== "salon"
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
   return (
     <div>
       {/* HEADER */}
@@ -90,7 +133,7 @@ export default function ReportsPage() {
           </thead>
 
           <tbody>
-            {reports.map((report) => (
+            {filteredReports.map((report) => (
               <tr
                 key={report.name}
                 className="border-t hover:bg-gray-50"

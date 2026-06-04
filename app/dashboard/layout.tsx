@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getBusinessId } from "@/lib/getBusinessId";
+import { getBusinessType } from "@/lib/getBusinessType";
 import {
   Package,
   ShoppingCart,
@@ -20,6 +21,7 @@ import {
   LogOut,
   User,
   Settings,
+  Sparkles,
 } from "lucide-react";
 
 type UserProfile = {
@@ -41,6 +43,7 @@ export default function DashboardLayout({
   const [profileOpen, setProfileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
+  const [businessType, setBusinessType,] = useState("");
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -83,22 +86,35 @@ export default function DashboardLayout({
       const businessId =
   await getBusinessId();
 
-const { data: business } =
-  await supabase
-    .from("businesses")
-    .select("logo_url")
-    .eq("id", businessId)
-    .single();
+    const { data: business } =
+      await supabase
+        .from("businesses")
+        .select("logo_url")
+        .eq("id", businessId)
+        .single();
 
-if (business?.logo_url) {
-  setLogoUrl(
-    business.logo_url
-  );
+        if (business?.logo_url) {
+          setLogoUrl(
+            business.logo_url
+          );
+        }
+        }
+
+        loadUser();
+      }, [router]);
+
+          useEffect(() => {
+          loadBusinessType();
+        }, []);
+
+  async function loadBusinessType() {
+  const type =
+    await getBusinessType();
+
+  if (type) {
+    setBusinessType(type);
+  }
 }
-    }
-
-    loadUser();
-  }, [router]);
 
   async function logout() {
     await supabase.auth.signOut();
@@ -116,15 +132,12 @@ if (business?.logo_url) {
   const role = userProfile?.role || "";
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="h-screen flex overflow-hidden bg-gray-100">
       {/* SIDEBAR */}
-      <aside
-        className={`fixed md:relative z-50 h-screen bg-gray-500 text-white p-5 transition-all duration-300
-          ${open ? "w-64" : "w-0 md:w-20 overflow-hidden"}
-          `}
-      >
+      <aside className="h-screen overflow-y-auto bg-gray-600 text-white flex-shrink-0">
+       
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="px-3 flex items-center justify-between border-b border-gray-600">
           <div className="flex items-center gap-3 relative" ref={menuRef}>
 
            {open && logoUrl && (
@@ -194,11 +207,11 @@ if (business?.logo_url) {
         </div>
 
         {/* NAVIGATION */}
-        <nav className="space-y-1 flex-1">
+        <nav className="flex-1 overflow-y-auto px-5 py-4 space-y-1 custom-scrollbar">
           {/* ADMIN ONLY */}
             {role === "admin" && (
           <>
-            <Link
+        <Link
         href="/dashboard"
         className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
       >
@@ -213,6 +226,18 @@ if (business?.logo_url) {
         <Package size={20} />
         {open && "Products"}
       </Link>
+
+      {businessType === "salon" && (
+        <>
+          <Link
+            href="/dashboard/services"
+            className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+          >
+            <Sparkles size={20} />
+            {open && "Services"}
+          </Link>
+          </>
+          )}
 
       <Link
         href="/dashboard/categories"
@@ -229,6 +254,18 @@ if (business?.logo_url) {
         <ShoppingCart size={20} />
         {open && "Sales"}
       </Link>
+
+      {businessType === "salon" && (
+        <>
+        <Link
+            href="/dashboard/service-sales"
+            className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+          >
+            <ShoppingCart size={20} />
+            {open && "Service Sales"}
+          </Link>
+        </>
+      )}
 
       <Link
         href="/dashboard/purchases"
@@ -328,7 +365,7 @@ if (business?.logo_url) {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 p-3 md:p-6">{children}</main>
+      <main className="flex-1 h-screen overflow-y-auto scroll-smooth p-4">{children}</main>
     </div>
   );
 }

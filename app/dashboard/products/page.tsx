@@ -7,6 +7,7 @@ import { formatCurrency, } from "@/lib/formatCurrency";
 import { logAction } from "@/lib/auditLog";
 import StockHistory from "@/components/StockHistory";
 import { getBusinessId } from "@/lib/getBusinessId";
+import * as XLSX from "xlsx";
 
 type Product = {
   id: number;
@@ -393,6 +394,122 @@ if (!profile?.business_id) {
         setHistoryModalOpen(true);
       }
 
+        async function handleImport(
+          e: React.ChangeEvent<HTMLInputElement>
+        ) {
+          const file = e.target.files?.[0];
+
+          if (!file) return;
+
+          const buffer =
+            await file.arrayBuffer();
+
+          const workbook =
+            XLSX.read(buffer);
+
+          const sheet =
+            workbook.Sheets[
+              workbook.SheetNames[0]
+            ];
+
+          const rows: any[] =
+            XLSX.utils.sheet_to_json(sheet);
+
+          const businessId =
+            await getBusinessId();
+
+          /*
+            GET ALL CATEGORIES
+          */
+          const {
+            data: categories,
+            error: categoryError,
+          } = await supabase
+            .from("categories")
+            .select("id, name");
+
+          if (categoryError) {
+            console.error(categoryError);
+
+            alert(
+              "Failed loading categories"
+            );
+
+            return;
+          }
+
+          const products = rows.map(
+            (row) => {
+              const category =
+                categories?.find(
+                  (c) =>
+                    c.name
+                      .toLowerCase()
+                      .trim() ===
+                    row.Category
+                      ?.toLowerCase()
+                      .trim()
+                );
+
+      return {
+        business_id: businessId,
+
+        name: row.Name,
+
+        category_id:
+          category?.id || null,
+
+        stock_quantity:
+          Number(
+            row.Stock || 0
+          ),
+
+        buying_price:
+          Number(
+            row[
+              "Buying Price"
+            ] || 0
+          ),
+
+        selling_price:
+          Number(
+            row[
+              "Selling Price"
+            ] || 0
+          ),
+
+        minimum_stock:
+          Number(
+            row[
+              "Minimum Stock"
+            ] || 0
+          ),
+      };
+    }
+  );
+
+  const { error } =
+    await supabase
+      .from("products")
+      .insert(products);
+
+  if (error) {
+    console.error(error);
+
+    alert(
+      "Import failed"
+    );
+
+    return;
+  }
+
+  alert(
+    `${products.length} products imported successfully`
+  );
+
+  fetchProducts();
+}
+
   return (
     <div>
       {/* PAGE HEADER */}
@@ -461,11 +578,31 @@ if (!profile?.business_id) {
                 selectedProduct
               )
             }
-            className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50"
+            className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200"
           >
             History
           </button>
-        </div>
+
+          <button
+              onClick={() =>
+                document
+                  .getElementById("import-file")
+                  ?.click()
+              }
+              className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50"
+            >
+              Import Products
+            </button>
+
+            <input
+              id="import-file"
+              type="file"
+              accept=".xlsx,.csv"
+              hidden
+              onChange={handleImport}
+            />
+
+            </div>
 
         {/* SEARCH */}
         <input

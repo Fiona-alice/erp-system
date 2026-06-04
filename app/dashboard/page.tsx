@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState, } from "react";
 import { useRouter } from "next/navigation";
 import {
   ResponsiveContainer,
@@ -16,6 +12,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { getBusinessId } from "@/lib/getBusinessId";
+import { getBusinessType } from "@/lib/getBusinessType";
 import { supabase } from "@/lib/supabase";
 
 import {
@@ -27,6 +24,12 @@ type Sale = {
   profit: number;
   sale_date: string;
   created_at: string;
+};
+
+type ServiceSale = {
+  total_amount: number;
+  profit: number;
+  service_date: string;
 };
 
 type Expense = {
@@ -48,6 +51,9 @@ export default function DashboardPage() {
 
   const [businessId, setBusinessId] =
   useState<string>("");
+
+  const [businessType, setBusinessType,] = 
+  useState("");
   
   const [roleLoading, setRoleLoading] =
   useState(true);
@@ -57,6 +63,9 @@ export default function DashboardPage() {
 
   const [sales, setSales] =
     useState<Sale[]>([]);
+
+  const [serviceSales, setServiceSales] =
+  useState<ServiceSale[]>([]);
 
   const [expenses, setExpenses] =
     useState<Expense[]>([]);
@@ -106,7 +115,14 @@ export default function DashboardPage() {
   checkRole();
 }, [router]);
 
- 
+ async function loadBusinessType() {
+  const type =
+    await getBusinessType();
+
+  if (type) {
+    setBusinessType(type);
+  }
+}
 
   // FETCH SALES
   async function fetchSales( businessId: string) {
@@ -123,6 +139,27 @@ export default function DashboardPage() {
 
     setSales(data || []);
   }
+
+   // FETCH SERVICE SALES
+    async function fetchServiceSales(
+      businessId: string
+    ) {
+      const { data, error } =
+        await supabase
+          .from("service_sales")
+          .select("*")
+          .eq(
+            "business_id",
+            businessId
+          );
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setServiceSales(data || []);
+    }
 
   // FETCH EXPENSES
   async function fetchExpenses( businessId: string) {
@@ -179,12 +216,13 @@ export default function DashboardPage() {
     if (!id) return;
 
     setBusinessId(id);
-
     fetchSales(id);
+    fetchServiceSales(id);
     fetchExpenses(id);
     fetchRentals(id);
     fetchProducts(id);
   }
+  loadBusinessType();
   loadData();
 }, []);
 
@@ -242,6 +280,61 @@ export default function DashboardPage() {
       startDate,
       endDate,
     ]);
+
+    // FILTER SERVICE SALES    
+    const filteredServiceSales =
+      useMemo(() => {
+        return serviceSales.filter(
+          (sale) => {
+            const saleDate =
+              new Date(
+                sale.service_date
+              );
+
+            const start =
+              startDate
+                ? new Date(
+                    startDate
+                  )
+                : null;
+
+            const end =
+              endDate
+                ? new Date(
+                    endDate
+                  )
+                : null;
+
+            if (
+              start &&
+              saleDate < start
+            ) {
+              return false;
+            }
+
+            if (end) {
+              end.setHours(
+                23,
+                59,
+                59,
+                999
+              );
+
+              if (
+                saleDate > end
+              ) {
+                return false;
+              }
+            }
+
+            return true;
+          }
+        );
+      }, [
+        serviceSales,
+        startDate,
+        endDate,
+      ]);
 
   // FILTER EXPENSES
   const filteredExpenses =
@@ -367,6 +460,20 @@ export default function DashboardPage() {
       0
     );
 
+  const totalServiceSales =
+  filteredServiceSales.reduce(
+    (sum, sale) =>
+      sum +
+      Number(
+        sale.total_amount
+      ),
+    0
+  );
+
+  const combinedSales =
+  totalSales +
+  totalServiceSales;
+
   // GROSS PROFIT
   const grossProfit =
     filteredSales.reduce(
@@ -375,6 +482,18 @@ export default function DashboardPage() {
         Number(sale.profit),
       0
     );
+
+  const serviceProfit =
+  filteredServiceSales.reduce(
+    (sum, sale) =>
+      sum +
+      Number(sale.profit),
+    0
+  );
+   
+  const combinedProfit =
+  grossProfit +
+  serviceProfit;
 
   // TOTAL EXPENSES
   const totalExpenses =
@@ -414,23 +533,23 @@ export default function DashboardPage() {
 
   // NET PROFIT
   const netProfit =
-    grossProfit +
-    rentalIncome -
-    totalExpenses;
+  combinedProfit +
+  rentalIncome -
+  totalExpenses;
 
   // GROSS PROFIT MARGIN
   const grossProfitMargin =
-    totalSales > 0
-      ? (grossProfit /
-          totalSales) *
+    combinedSales > 0
+      ? (combinedProfit /
+          combinedSales) *
         100
       : 0;
 
   // NET PROFIT MARGIN
   const netProfitMargin =
-    totalSales > 0
+    combinedSales > 0
       ? (netProfit /
-          totalSales) *
+          combinedSales) *
         100
       : 0;
 
@@ -603,10 +722,26 @@ if (!isAdmin) {
 
           <h2 className="text-2xl font-bold text-gray-500 mt-2">
             {formatCurrency(
-              totalSales
+              combinedSales
             )}
           </h2>
         </div>
+
+        {businessType ===
+          "salon" && (
+          <div className="bg-white rounded-2xl shadow border p-5">
+            <p className="text-sm font-bold text-blue-900">
+              Salon Revenue
+              (UGX)
+            </p>
+
+            <h2 className="text-2xl font-bold text-gray-500 mt-2">
+              {formatCurrency(
+                totalServiceSales
+              )}
+            </h2>
+          </div>
+        )}
 
         {/* GROSS PROFIT */}
         <div className="bg-white rounded-2xl shadow border p-5">
@@ -617,10 +752,26 @@ if (!isAdmin) {
 
           <h2 className="text-2xl font-bold text-gray-500 mt-2">
             {formatCurrency(
-              grossProfit
+              combinedProfit
             )}
           </h2>
         </div>
+
+        {businessType ===
+          "salon" && (
+          <div className="bg-white rounded-2xl shadow border p-5">
+            <p className="text-sm font-bold text-blue-900">
+              Salon Profit
+              (UGX)
+            </p>
+
+            <h2 className="text-2xl font-bold text-gray-500 mt-2">
+              {formatCurrency(
+                serviceProfit
+              )}
+            </h2>
+          </div>
+        )}
 
         {/* RENTALS */}
         <div className="bg-white rounded-2xl shadow border p-5">
