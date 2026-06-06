@@ -19,13 +19,24 @@ type Product = {
   buying_price: number;
   selling_price: number;
   stock_quantity: number;
-   minimum_stock: number;
+  minimum_stock: number;
+  unit_id: number | null;
+
+  units?: {
+    name: string;
+    short_name: string;
+  };
 };
 
 type Category = {
   id: number;
-
   name: string;
+};
+
+type Unit = {
+  id: number;
+  name: string;
+  short_name: string;
 };
 
 export default function ProductsPage() {
@@ -33,6 +44,7 @@ export default function ProductsPage() {
   const [selectedProduct, setSelectedProduct] =
     useState<Product | null>(null);
 
+  const [units, setUnits] = useState<Unit[]>([]);
   const [selectedCategory, setSelectedCategory] =
   useState("");
 
@@ -69,6 +81,8 @@ export default function ProductsPage() {
   const [historyProduct, setHistoryProduct,] = 
   useState<Product | null>(null);
 
+  const [unitId, setUnitId] = useState("");
+
   const [businessId, setBusinessId] = useState<string>("");
 
    // GET BUSINESS ID
@@ -84,9 +98,15 @@ export default function ProductsPage() {
     const { data, error } = await supabase
       .from("products")
       .select(`
-       *,
-    categories(name)
-   `)
+      *,
+      categories (
+        name
+      ),
+      units (
+        name,
+        short_name
+      )
+    `)
       .eq("business_id", businessId) 
       .order("id", { ascending: false });
 
@@ -107,6 +127,7 @@ export default function ProductsPage() {
     if (businessId) {
       fetchProducts();
       fetchCategories();
+      fetchUnits();
     }
   }, [businessId]);
 
@@ -162,6 +183,22 @@ export default function ProductsPage() {
     console.error(err);
   }
 }
+
+async function fetchUnits() {
+  const { data, error } =
+    await supabase
+      .from("units")
+      .select("*")
+      .order("name");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setUnits(data || []);
+}
+
   // FETCH CATEGORIES
   async function fetchCategories() {
      if (!businessId) return;
@@ -223,6 +260,7 @@ if (!profile?.business_id) {
           buying_price: Number(buyingPrice),
           selling_price: Number(sellingPrice),
           stock_quantity: Number(stockQuantity),
+          unit_id: Number(unitId),
           minimum_stock: Number(minimumStock),
         },
       ]);
@@ -300,7 +338,8 @@ if (!profile?.business_id) {
         buying_price: Number(buyingPrice),
         selling_price: Number(sellingPrice),
         stock_quantity: Number(stockQuantity),
-         minimum_stock: Number(minimumStock),
+        unit_id: Number(unitId),
+        minimum_stock: Number(minimumStock),
       })
       .eq("id", editingProduct.id)
       .eq("business_id", businessId);
@@ -640,6 +679,9 @@ if (!profile?.business_id) {
           <th className="text-left p-2 border border-gray-200">
             Stock
           </th>
+          <th className="text-left p-2 border border-gray-200">
+            Base UoM
+          </th>
         </tr>
       </thead>
 
@@ -690,6 +732,11 @@ if (!profile?.business_id) {
                 {product.stock_quantity}
               </span>
             </td>
+            <td className="p-2 text-gray-700 border border-gray-200">
+            {product.units
+              ? `${product.units.name} (${product.units.short_name})`
+              : "-"}
+          </td>
           </tr>
         ))}
       </tbody>
@@ -783,6 +830,27 @@ if (!profile?.business_id) {
                 }
               />
               
+              <select
+                value={unitId}
+                onChange={(e) =>
+                  setUnitId(e.target.value)
+                }
+                className="w-full border p-3 rounded-lg"
+              >
+                <option value="">
+                  Select UOM
+                </option>
+
+                {units.map((unit: any) => (
+                  <option
+                    key={unit.id}
+                    value={unit.id}
+                  >
+                    {unit.name} ({unit.short_name})
+                  </option>
+                ))}
+              </select>
+
              <input
                 type="number"
                 placeholder="Minimum Stock"
@@ -790,7 +858,7 @@ if (!profile?.business_id) {
                 value={minimumStock}
                 onChange={(e) =>
                 setMinimumStock(
-                   e.target.value
+                   e.target.value 
                  )
                }
              /> 

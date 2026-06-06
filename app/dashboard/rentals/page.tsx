@@ -38,6 +38,9 @@ type Rental = {
 
   products: {
     name: string;
+    units?: {
+    short_name: string;
+  };
   };
 };
 
@@ -160,7 +163,11 @@ export default function RentalsPage() {
     .select(`
       *,
       customers(name),
-      products(name)
+      products(name,
+       units (
+      short_name
+    )
+      )
     `)
     .eq("business_id", businessId)
     .order("id", { ascending: false });
@@ -815,7 +822,7 @@ export default function RentalsPage() {
                   </td>
 
                   <td className="p-2 text-gray-700 border border-gray-200">
-                    {rental.quantity}
+                    {rental.quantity} {rental.products?.units?.short_name}
                   </td>
 
                   <td className="p-2 text-gray-700 border border-gray-200">

@@ -25,6 +25,9 @@ type Purchase = {
   created_at: string;
   products: {
     name: string;
+    units?: {
+    short_name: string;
+  };
   };
 };
 
@@ -106,7 +109,11 @@ export default function PurchasesPage() {
         .from("purchases")
         .select(`
           *,
-          products(name)
+          products(name,
+          units (
+            short_name
+          )
+          )
         `)
         .eq("business_id", businessId) 
         .order("id", {
@@ -723,9 +730,7 @@ export default function PurchasesPage() {
                     </td>
 
                     <td className="p-2 text-gray-700 border border-gray-200">
-                      {
-                        purchase.quantity
-                      }
+                      {purchase.quantity} {purchase.products?.units?.short_name}
                     </td>
 
                     <td className="p-2 text-gray-700 border border-gray-200">
