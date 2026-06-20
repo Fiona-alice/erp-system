@@ -182,16 +182,16 @@ export default function LowStockReportPage() {
     <div className="space-y-6">
 
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Low Stock Report
         </h1>
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white border rounded-xl p-4 flex flex-wrap gap-3 items-start">
+      <div className="bg-white border rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
 
-        <div className="min-w-[260px]">
+         <div className="w-full">
           <Select
             isMulti
             options={productOptions}
@@ -221,7 +221,7 @@ export default function LowStockReportPage() {
           />
         </div>
 
-        <div className="min-w-[260px]">
+         <div className="w-full">
           <Select
             isMulti
             options={categoryOptions}
@@ -254,14 +254,15 @@ export default function LowStockReportPage() {
 
         <button
           onClick={clearFilters}
-          className="bg-white border text-blue-900 px-3 py-2 rounded-lg hover:bg-blue-50 text-sm"
+          className="w-full md:w-auto bg-white border text-blue-900 px-4 py-2 rounded-lg hover:bg-blue-50
+          text-sm font-medium"
         >
           Clear
         </button>
       </div>
 
       {/* EXPORT */}
-      <div className="flex justify-end gap-2 mb-2">
+      <div className="flex justify-between sm:justify-end gap-2">
 
         <button className="p-1.5 rounded-md hover:bg-gray-100">
           <FileText
@@ -285,15 +286,15 @@ export default function LowStockReportPage() {
       <div className="bg-white border rounded-xl shadow overflow-hidden">
          <div className="overflow-x-auto">
         <div className="max-h-[500px] overflow-y-auto">
-         <table className="w-full text-sm border-collapse">
+         <table className="min-w-[900px] w-full text-sm border-collapse">
 
           <thead className="bg-gray-100 sticky top-0 z-10">
             <tr>
-              <th className="p-3 text-left border border-gray-200">Product</th>
-              <th className="p-3 text-left border border-gray-200">Category</th>
-              <th className="p-3 text-left border border-gray-200">Stock</th>
-              <th className="p-3 text-left border border-gray-200">Minimum</th>
-              <th className="p-3 text-left border border-gray-200">Buying Price</th>
+              <th className="px-3 py-2 text-left border border-gray-200">Product</th>
+              <th className="px-3 py-2 text-left border border-gray-200">Category</th>
+              <th className="px-3 py-2 text-left border border-gray-200">Stock</th>
+              <th className="px-3 py-2 text-left border border-gray-200">Minimum</th>
+              <th className="px-3 py-2 text-left border border-gray-200">Buying Price</th>
             </tr>
           </thead>
 
@@ -311,7 +312,7 @@ export default function LowStockReportPage() {
 
             ) : reportProducts.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-gray-500">
+                <td colSpan={7} className="p-6 text-center text-gray-500">
                   No low stock products found
                 </td>
               </tr>
@@ -321,19 +322,19 @@ export default function LowStockReportPage() {
               reportProducts.map((p) => (
                 <tr key={p.id} className="border-t">
 
-                  <td className="p-3 border border-gray-200">{p.name}</td>
+                  <td className="px-3 py-2 border border-gray-200">{p.name}</td>
 
-                  <td className="p-3 border border-gray-200">
+                  <td className="px-3 py-2 border border-gray-200">
                     {p.categories?.name || "Uncategorized"}
                   </td>
 
-                  <td className="p-3 text-red-600 font-bold border border-gray-200">
+                  <td className="px-3 py-2 text-red-600 font-bold border border-gray-200">
                     {p.stock_quantity}
                   </td>
 
-                  <td className="p-3 border border-gray-200">{p.minimum_stock}</td>
+                  <td className="px-3 py-2 border border-gray-200">{p.minimum_stock}</td>
 
-                  <td className="p-3 border border-gray-200">
+                  <td className="px-3 py-2 border border-gray-200">
                     {formatCurrency(p.buying_price)}
                   </td>
 

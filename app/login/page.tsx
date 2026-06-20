@@ -57,19 +57,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-200 via-gray-100 to-blue-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-200 via-gray-100 to-blue-100 px-4 py-6">
 
       {/* CENTER CARD */}
-      <div className="w-full max-w-sm bg-white rounded-lg shadow-md border border-gray-200 p-10 space-y-5">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 md:p-10">
 
         {/* LOGO AREA */}
-        <div className="text-center mb-6">
+         <div className="text-center mb-8">
         <h1 className="text-2xl font-semibold">
         <span className="text-black font-bold">BMS</span>
         <span className="text-green-500 font-semibold">ystem</span>
         </h1>
 
-        <p className="text-sm text-gray-900 mt-1">
+        <p className="text-sm text-gray-600 mt-2">
          Please log in to continue
         </p>
         </div>
@@ -77,7 +77,7 @@ export default function LoginPage() {
         {/* USERNAME */}
         <div className="justify-center px-[15%]">
         <div className="mb-2">
-          <label className="text-sm text-gray-900">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             User Name
           </label>
           <input
@@ -90,14 +90,14 @@ export default function LoginPage() {
               login();
             }
             }}
-            className="w-full border border-gray-300 rounded-md p-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full border border-gray-300 rounded-md p-1 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
             
           />
         </div>
 
         {/* PASSWORD */}
         <div className="mb-4">
-          <label className="text-sm text-gray-900">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
           <input
@@ -110,7 +110,7 @@ export default function LoginPage() {
                 login();
               }
               }}
-            className="w-full mt-1 border border-gray-300 rounded-md p-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="w-full mt-1 border border-gray-300 rounded-md p-1 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-400"
             
           />
         </div>

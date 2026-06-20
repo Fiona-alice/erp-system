@@ -8,6 +8,7 @@ import { logAction } from "@/lib/auditLog";
 import StockHistory from "@/components/StockHistory";
 import { getBusinessId } from "@/lib/getBusinessId";
 import * as XLSX from "xlsx";
+import { Search, X } from "lucide-react";
 
 type Product = {
   id: number;
@@ -552,19 +553,19 @@ if (!profile?.business_id) {
   return (
     <div>
       {/* PAGE HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Products
         </h1>
 
-        <p className="text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 mt-1">
           Manage inventory products
         </p>
       </div>
 
       {/* TOOLBAR */}
-      <div className="bg-white p-2 rounded-lg shadow mb-3 flex flex-wrap gap-2 items-center justify-between text-sm">
-        <div className="flex gap-2">
+      <div className="bg-white p-2 rounded-lg shadow mb-3 flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
           {/* ADD */}
           {permissions?.can_create && (
           <button
@@ -575,7 +576,7 @@ if (!profile?.business_id) {
 
               setIsOpen(true);
             }}
-            className="border bg-gray-50 text-blue-700 px-3 py-1.5 rounded-md hover:bg-gray-100"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-md hover:bg-gray-100 text-sm"
           >
             New 
           </button>
@@ -589,7 +590,7 @@ if (!profile?.business_id) {
               selectedProduct &&
               openEditModal(selectedProduct)
             }
-            className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm disabled:opacity-50"
           >
             Edit
           </button>
@@ -603,7 +604,7 @@ if (!profile?.business_id) {
               selectedProduct &&
               deleteProduct(selectedProduct.id)
             }
-            className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm disabled:opacity-50"
           >
             Delete
           </button>
@@ -617,7 +618,7 @@ if (!profile?.business_id) {
                 selectedProduct
               )
             }
-            className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm"
           >
             History
           </button>
@@ -628,7 +629,7 @@ if (!profile?.business_id) {
                   .getElementById("import-file")
                   ?.click()
               }
-              className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50"
+              className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm disabled:opacity-50"
             >
               Import Products
             </button>
@@ -644,42 +645,73 @@ if (!profile?.business_id) {
             </div>
 
         {/* SEARCH */}
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          className="border px-2 py-1.5 rounded-md w-56 text-sm"
-        />
+        <div className="relative w-full md:w-50">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="
+              w-full
+              border
+              rounded-md
+              pl-9
+              pr-10
+              py-1.5
+              text-sm
+              text-gray-900
+            "
+          />
+
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="
+                absolute
+                right-3
+                top-1/2
+                -translate-y-1/2
+                text-gray-400
+                hover:text-gray-700
+              "
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* TABLE */}
-<div className="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
-   <div className="overflow-x-auto">
-  <div className="max-h-[400px] overflow-y-auto">
-    <table className="w-full text-sm border-collapse">
+      <div className="bg-white rounded-xl shadow border border-gray-200">
+        <div className="overflow-x-auto">
+         <div className="max-h-[400px] overflow-y-auto">
+        <table className="min-w-[800px] w-full text-sm border-collapse">
 
       {/* HEADER */}
       <thead className="bg-gray-100 sticky top-0 z-10">
         <tr>
-          <th className="text-left p-2 border border-gray-200">
+          <th className="text-left px-3 p-2 border border-gray-200">
             Name
           </th>
-          <th className="text-left p-2 border border-gray-200">
+          <th className="text-left px-3 p-2 border border-gray-200">
             Product Category
           </th>
-          <th className="text-left p-2 border border-gray-200">
+          <th className="text-left px-3 p-2 border border-gray-200">
             Buy Price
           </th>
-          <th className="text-left p-2 border border-gray-200">
+          <th className="text-left px-3 p-2 border border-gray-200">
             Sell Price
           </th>
-          <th className="text-left p-2 border border-gray-200">
+          <th className="text-left px-3 p-2 border border-gray-200">
             Stock
           </th>
-          <th className="text-left p-2 border border-gray-200">
+          <th className="text-left px-3 p-2 border border-gray-200">
             Base UoM
           </th>
         </tr>
@@ -700,26 +732,26 @@ if (!profile?.business_id) {
                 : ""
             }`}
           >
-            <td className="p-2 text-gray-700 border border-gray-200">
+            <td className="px-3 p-2 text-gray-700 border border-gray-200">
               {product.name}
             </td>
-            <td className="p-2 text-gray-700 border border-gray-200">
+            <td className="px-3 p-2 text-gray-700 border border-gray-200">
               {product.categories?.name}
             </td>
-            <td className="p-2 text-gray-700 border border-gray-200">
+            <td className="px-3 p-2 text-gray-700 border border-gray-200">
               UGX{" "}
               {formatCurrency(
                 product.buying_price
               )}
             </td>
 
-            <td className="p-2 text-gray-700 border border-gray-200">
+            <td className="px-3 p-2 text-gray-700 border border-gray-200">
               UGX{" "}
               {formatCurrency(
                 product.selling_price
               )}
             </td>
-            <td className="p-2 text-gray-700 border border-gray-200">
+            <td className="px-3 p-2 text-gray-700 border border-gray-200">
 
               <span
                 className={`font-medium ${
@@ -732,7 +764,7 @@ if (!profile?.business_id) {
                 {product.stock_quantity}
               </span>
             </td>
-            <td className="p-2 text-gray-700 border border-gray-200">
+            <td className="px-3 p-2 text-gray-700 border border-gray-200">
             {product.units
               ? `${product.units.name} (${product.units.short_name})`
               : "-"}
@@ -753,7 +785,7 @@ if (!profile?.business_id) {
         <div className="fixed inset-0 bg-black/40" />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-md">
+          <Dialog.Panel className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <Dialog.Title className="text-2xl font-bold mb-4">
               {editingProduct
                 ? "Edit Product"
@@ -764,7 +796,7 @@ if (!profile?.business_id) {
               <input
                 type="text"
                 placeholder="Product Name"
-                className="w-full border p-2 rounded"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
                 value={name}
                 onChange={(e) =>
                   setName(e.target.value)
@@ -778,7 +810,7 @@ if (!profile?.business_id) {
                 e.target.value
                  )
                 }
-                 className="w-full border p-3 rounded-lg"
+                 className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
                   >
                 <option value="">
                 Select Category
@@ -797,7 +829,7 @@ if (!profile?.business_id) {
               <input
                 type="number"
                 placeholder="Buying Price"
-                className="w-full border p-2 rounded"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
                 value={buyingPrice}
                 onChange={(e) =>
                   setBuyingPrice(
@@ -809,7 +841,7 @@ if (!profile?.business_id) {
               <input
                 type="number"
                 placeholder="Selling Price"
-                className="w-full border p-2 rounded"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
                 value={sellingPrice}
                 onChange={(e) =>
                   setSellingPrice(
@@ -821,7 +853,7 @@ if (!profile?.business_id) {
               <input
                 type="number"
                 placeholder="Stock Quantity"
-                className="w-full border p-2 rounded"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
                 value={stockQuantity}
                 onChange={(e) =>
                   setStockQuantity(
@@ -835,7 +867,7 @@ if (!profile?.business_id) {
                 onChange={(e) =>
                   setUnitId(e.target.value)
                 }
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               >
                 <option value="">
                   Select UOM
@@ -854,7 +886,7 @@ if (!profile?.business_id) {
              <input
                 type="number"
                 placeholder="Minimum Stock"
-                className="w-full border p-2 rounded"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
                 value={minimumStock}
                 onChange={(e) =>
                 setMinimumStock(
@@ -868,7 +900,7 @@ if (!profile?.business_id) {
                     ? updateProduct
                     : addProduct
                 }
-                className="w-full bg-black text-white py-2 rounded-lg"
+                className="w-full bg-gray-100 text-blue-900 border px-4 py-2 rounded-lg hover:bg-gray-200"
               >
                 {editingProduct
                   ? "Update Product"
@@ -890,7 +922,7 @@ if (!profile?.business_id) {
   <div className="fixed inset-0 bg-black/40" />
 
   <div className="fixed inset-0 flex items-center justify-center p-4">
-    <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+    <Dialog.Panel className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
 
       <Dialog.Title className="text-2xl font-bold mb-4">
         Stock History

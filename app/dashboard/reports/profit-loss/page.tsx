@@ -11,6 +11,7 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import { getBusinessId } from "@/lib/getBusinessId";
+import { getBusinessType } from "@/lib/getBusinessType";
 
 type Sale = {
   id: number;
@@ -49,6 +50,13 @@ type OptionType = {
   label: string;
 };
 
+type ServiceSale = {
+  total_amount: number;
+  profit: number;
+  cost_amount: number;
+  service_date: string;
+};
+
 export default function ProfitLossReportPage() {
   const [sales, setSales] =
     useState<Sale[]>([]);
@@ -70,13 +78,27 @@ export default function ProfitLossReportPage() {
   const [endDate, setEndDate] =
     useState("");
 
+  const [serviceSales, setServiceSales,] = 
+  useState<ServiceSale[]>( []);
+
   const [businessId, setBusinessId] = useState<string>("");
+  const [businessType, setBusinessType] = useState("");
   
      // GET BUSINESS ID
      async function loadBusiness() {
       const id = await getBusinessId(); 
       setBusinessId(id);
-    }    
+    }
+    
+    async function loadBusinessType() {
+    const type =
+    await getBusinessType();
+
+    if (type) {
+    setBusinessType(type);
+    }
+    }
+
   // -----------------------------
   // FETCH SALES
   // -----------------------------
@@ -105,6 +127,22 @@ export default function ProfitLossReportPage() {
       (data as unknown as Sale[]) || []
     );
   }
+
+  async function fetchServiceSales() {
+    if (!businessId) return;
+      const { data, error } =
+        await supabase
+          .from("service_sales")
+          .select("*")
+          .eq("business_id", businessId);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setServiceSales(data || []);
+    }
 
   // -----------------------------
   // FETCH EXPENSES
@@ -159,6 +197,7 @@ export default function ProfitLossReportPage() {
 
  useEffect(() => {
     loadBusiness();
+    loadBusinessType();
   }, []);
 
   useEffect(() => {
@@ -166,6 +205,7 @@ export default function ProfitLossReportPage() {
       fetchSales();
       fetchExpenses();
       fetchAdjustments();
+      fetchServiceSales();
     }
   }, [businessId]);
 
@@ -278,6 +318,57 @@ export default function ProfitLossReportPage() {
       hasFilters,
     ]);
 
+  
+  const filteredServiceSales =
+  useMemo(() => {
+    return serviceSales.filter(
+      (sale) => {
+        const saleDate =
+          new Date(
+            sale.service_date
+          );
+
+        const start =
+          startDate
+            ? new Date(startDate)
+            : null;
+
+        const end =
+          endDate
+            ? new Date(endDate)
+            : null;
+
+        if (
+          start &&
+          saleDate < start
+        ) {
+          return false;
+        }
+
+        if (end) {
+          end.setHours(
+            23,
+            59,
+            59,
+            999
+          );
+
+          if (
+            saleDate > end
+          ) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+    );
+  }, [
+    serviceSales,
+    startDate,
+    endDate,
+  ]);
+    
   // -----------------------------
   // EXPENSE FILTER
   // -----------------------------
@@ -408,7 +499,31 @@ export default function ProfitLossReportPage() {
   // -----------------------------
   // CALCULATIONS
   // -----------------------------
-  const revenue =
+  const serviceRevenue =
+  filteredServiceSales.reduce(
+    (sum, serviceSale) =>
+      sum +
+      Number(
+        serviceSale.total_amount
+      ),
+    0
+  );
+
+  const serviceCogs =
+  filteredServiceSales.reduce(
+    (sum, serviceSale) =>
+      sum +
+      Number(
+        serviceSale.cost_amount
+      ),
+    0
+  );
+
+  const serviceProfit =
+  serviceRevenue -
+  serviceCogs;
+
+  const productRevenue =
     filteredSales.reduce(
       (sum, sale) =>
         sum +
@@ -418,7 +533,7 @@ export default function ProfitLossReportPage() {
       0
     );
 
-  const cogs =
+  const productCogs =
     filteredSales.reduce(
       (sum, sale) =>
         sum +
@@ -428,8 +543,20 @@ export default function ProfitLossReportPage() {
       0
     );
 
+    const totalRevenue =
+    businessType === "salon"
+    ? productRevenue +
+      serviceRevenue
+    : productRevenue;
+
+    const totalCogs =
+    businessType === "salon"
+    ? productCogs +
+      serviceCogs
+    : productCogs; 
+
   const grossProfit =
-    revenue - cogs;
+    totalRevenue -  totalCogs;
 
   const inventoryGain =
     filteredAdjustments
@@ -476,11 +603,43 @@ export default function ProfitLossReportPage() {
   const reportRows = [
     {
       item: "Sales Revenue",
-      amount: revenue,
+      amount: productRevenue,
     },
+     ...(businessType === "salon"
+    ? [
+        {
+          item:
+            "Service Revenue",
+          amount:
+            serviceRevenue,
+        },
+      ]
+    : []),
+
+    {
+    item: "Total Revenue",
+    amount: totalRevenue,
+    },
+
     {
       item: "Cost of Goods Sold",
-      amount: -cogs,
+      amount: -productCogs,
+    },
+
+     ...(businessType === "salon"
+    ? [
+        {
+          item:
+            "Service Costs",
+          amount:
+            -serviceCogs,
+        },
+      ]
+    : []),
+
+    {
+    item: "Total COGS",
+    amount: -totalCogs,
     },
     {
       item: "Gross Profit",
@@ -539,20 +698,20 @@ export default function ProfitLossReportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Profit & Loss Report
         </h1>
 
-        <p className="text-gray-500">
+        <p className="text-sm text-gray-500">
           Revenue, COGS, inventory adjustments
           and expenses
         </p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white border rounded-xl p-4 flex flex-wrap gap-3 items-start">
-        <div className="min-w-[260px]">
+      <div className="bg-white border rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
+        <div className="w-full">
           <Select
             isMulti
             options={categoryOptions}
@@ -589,7 +748,7 @@ export default function ProfitLossReportPage() {
               e.target.value
             )
           }
-          className="border px-3 py-2 rounded-lg"
+         className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
         />
 
         <input
@@ -600,19 +759,20 @@ export default function ProfitLossReportPage() {
               e.target.value
             )
           }
-          className="border px-3 py-2 rounded-lg"
+         className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
         />
 
         <button
           onClick={clearFilters}
-          className="bg-white border px-3 py-2 rounded-lg"
+          className="w-full md:w-auto bg-white border text-blue-900 px-4 py-2 rounded-lg hover:bg-blue-50
+          text-sm font-medium"
         >
           Clear
         </button>
       </div>
 
       {/* Export */}
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-between sm:justify-end gap-2">
         <button>
           <FileText
             size={17}
@@ -633,14 +793,14 @@ export default function ProfitLossReportPage() {
       {/* Report */}
       <div className="bg-white border rounded-xl shadow overflow-hidden">
          <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="min-w-[900px] w-full text-sm border-collapse">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 text-left">
+              <th className="px-3 py-2 text-left">
                 Description
               </th>
 
-              <th className="p-3 text-left">
+              <th className="px-3 py-2 text-left">
                 Amount
               </th>
             </tr>
@@ -664,12 +824,12 @@ export default function ProfitLossReportPage() {
                       key={row.item}
                       className="border-t"
                     >
-                      <td className="p-3">
+                      <td className="px-3 py-2">
                         {row.item}
                       </td>
 
                       <td
-                        className={`p-3 font-medium ${
+                        className={`px-3 py-2 font-medium ${
                           row.amount < 0
                             ? "text-red-600"
                             : row.item ===
@@ -687,11 +847,11 @@ export default function ProfitLossReportPage() {
                 )}
 
                 <tr className="bg-gray-50">
-                  <td className="p-3 font-medium">
+                  <td className="px-3 py-2 font-medium">
                     Report Period
                   </td>
 
-                  <td className="p-3">
+                  <td className="px-3 py-2">
                     {startDate
                       ? formatDate(
                           startDate

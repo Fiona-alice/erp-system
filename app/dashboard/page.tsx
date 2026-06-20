@@ -6,11 +6,25 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
   CartesianGrid,
 } from "recharts";
+import {
+  ShoppingCart,
+  TrendingUp,
+  Wallet,
+  Package,
+  Receipt,
+  HandCoins,
+  Coins,
+  Banknote,
+} from "lucide-react";
 import { getBusinessId } from "@/lib/getBusinessId";
 import { getBusinessType } from "@/lib/getBusinessType";
 import { supabase } from "@/lib/supabase";
@@ -24,6 +38,10 @@ type Sale = {
   profit: number;
   sale_date: string;
   created_at: string;
+  quantity: number;
+  products?: {
+    name: string;
+  };
 };
 
 type ServiceSale = {
@@ -34,6 +52,7 @@ type ServiceSale = {
 
 type Expense = {
   amount: number;
+  category: string;
   expense_date: string;
 };
 
@@ -45,6 +64,11 @@ type Rental = {
 type Product = {
   stock_quantity: number;
   buying_price: number;
+};
+
+type Purchase = {
+  total_amount: number;
+  purchase_date: string;
 };
 
 export default function DashboardPage() {
@@ -76,6 +100,9 @@ export default function DashboardPage() {
   const [products, setProducts] =
     useState<Product[]>([]);
 
+  const [purchases, setPurchases] =
+  useState<Purchase[]>([]);  
+
   const [startDate, setStartDate] =
     useState("");
 
@@ -83,7 +110,20 @@ export default function DashboardPage() {
     useState("");
 
   const router = useRouter(); 
-  
+
+  const COLORS = [
+  "#2563eb",
+  "#16a34a",
+  "#f59e0b",
+  "#dc2626",
+  "#9333ea",
+  "#0891b2",
+  "#ea580c",
+  "#65a30d",
+  "#7c3aed",
+  "#db2777",
+];
+
   useEffect(() => {
   async function checkRole() {
     const {
@@ -129,7 +169,12 @@ export default function DashboardPage() {
     const { data, error } =
       await supabase
         .from("sales")
-        .select("*")
+        .select(`
+        *,
+        products (
+          name
+        )
+      `)
         .eq("business_id", businessId);
 
     if (error) {
@@ -160,6 +205,24 @@ export default function DashboardPage() {
 
       setServiceSales(data || []);
     }
+
+     // FETCH PURCHASES
+    async function fetchPurchases(
+        businessId: string
+      ) {
+        const { data, error } =
+          await supabase
+            .from("purchases")
+            .select("*")
+            .eq("business_id", businessId);
+
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        setPurchases(data || []);
+      }
 
   // FETCH EXPENSES
   async function fetchExpenses( businessId: string) {
@@ -221,6 +284,7 @@ export default function DashboardPage() {
     fetchExpenses(id);
     fetchRentals(id);
     fetchProducts(id);
+    fetchPurchases(id);
   }
   loadBusinessType();
   loadData();
@@ -335,6 +399,57 @@ export default function DashboardPage() {
         startDate,
         endDate,
       ]);
+
+      // FILTER PURCHASES
+      const filteredPurchases =
+        useMemo(() => {
+          return purchases.filter(
+            (purchase) => {
+              const purchaseDate =
+                new Date(
+                  purchase.purchase_date
+                );
+
+              const start =
+                startDate
+                  ? new Date(startDate)
+                  : null;
+
+              const end =
+                endDate
+                  ? new Date(endDate)
+                  : null;
+
+              if (
+                start &&
+                purchaseDate < start
+              ) {
+                return false;
+              }
+
+              if (end) {
+                end.setHours(
+                  23,
+                  59,
+                  59,
+                  999
+                );
+
+                if (
+                  purchaseDate > end
+                ) {
+                  return false;
+                }
+              }
+
+              return true;
+            }
+          );
+        }, [
+          purchases,
+          startDate,
+          endDate,
+        ]);
 
   // FILTER EXPENSES
   const filteredExpenses =
@@ -495,6 +610,17 @@ export default function DashboardPage() {
   grossProfit +
   serviceProfit;
 
+   // TOTAL PURCHASES
+  const totalPurchases =
+  filteredPurchases.reduce(
+    (sum, purchase) =>
+      sum +
+      Number(
+        purchase.total_amount
+      ),
+    0
+  );
+
   // TOTAL EXPENSES
   const totalExpenses =
     filteredExpenses.reduce(
@@ -611,6 +737,56 @@ export default function DashboardPage() {
         }
       );
 
+      // SERVICE SALES
+        if (
+          businessType ===
+          "salon"
+        ) {
+          filteredServiceSales.forEach(
+            (sale) => {
+              const month =
+                new Date(
+                  sale.service_date
+                ).toLocaleString(
+                  "default",
+                  {
+                    month:
+                      "short",
+                    year:
+                      "numeric",
+                  }
+                );
+
+              if (
+                !monthlyData[
+                  month
+                ]
+              ) {
+                monthlyData[
+                  month
+                ] = {
+                  month,
+                  sales: 0,
+                  profit: 0,
+                  expenses: 0,
+                };
+              }
+
+              monthlyData[
+                month
+              ].sales += Number(
+                sale.total_amount
+              );
+
+              monthlyData[
+                month
+              ].profit += Number(
+                sale.profit
+              );
+            }
+          );
+        }
+
       // EXPENSES
       filteredExpenses.forEach(
         (expense) => {
@@ -659,6 +835,89 @@ export default function DashboardPage() {
       filteredExpenses,
     ]);  
 
+const topProductsData =
+  useMemo(() => {
+    const grouped: Record<
+      string,
+      number
+    > = {};
+
+    filteredSales.forEach(
+      (sale) => {
+        const name =
+          sale.products
+            ?.name ||
+          "Unknown";
+
+        grouped[name] =
+          (grouped[name] ||
+            0) +
+          Number(
+            sale.total_amount
+          );
+      }
+    );
+
+    return Object.entries(
+      grouped
+    )
+      .map(
+        ([name, value]) => ({
+          name,
+          value,
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.value -
+          a.value
+      )
+      .slice(0, 7);
+  }, [filteredSales]);
+
+  const expensePieData =
+  useMemo(() => {
+    const grouped: Record<
+      string,
+      number
+    > = {};
+
+    filteredExpenses.forEach(
+      (expense) => {
+        const category =
+          expense.category ||
+          "Other";
+
+        grouped[
+          category
+        ] =
+          (grouped[
+            category
+          ] || 0) +
+          Number(
+            expense.amount
+          );
+      }
+    );
+
+    return Object.entries(
+      grouped
+    )
+      .map(
+        ([name, value]) => ({
+          name,
+          value,
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.value -
+          a.value
+      )
+      .slice(0, 7);
+  }, [filteredExpenses]);
+
+
  if (roleLoading) {
   return (
     <div className="flex items-center justify-center min-h-[300px]">
@@ -672,11 +931,11 @@ if (!isAdmin) {
 } 
     
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 md:space-y-10 px-3 sm:px-4 md:px-0">
       {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-blue-900">
+          <h1 className="text-xl md:text-2xl font-bold text-blue-900">
             Dashboard Analytics
           </h1>
 
@@ -686,7 +945,7 @@ if (!isAdmin) {
         </div>
 
         {/* DATE FILTERS */}
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <input
             type="date"
             value={startDate}
@@ -695,7 +954,7 @@ if (!isAdmin) {
                 e.target.value
               )
             }
-            className="border rounded-lg px-2 py-1.5 bg-white"
+            className="border rounded-lg px-3 py-2 bg-white w-full sm:w-auto"
           />
 
           <input
@@ -706,21 +965,26 @@ if (!isAdmin) {
                 e.target.value
               )
             }
-            className="border rounded-lg px-2 py-1.5 bg-white"
+            className="border rounded-lg px-3 py-2 bg-white w-full sm:w-auto"
           />
         </div>
       </div>
 
       {/* KPI CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* SALES */}
-        <div className="bg-white rounded-2xl shadow border p-5">
+        <div className="bg-white border border-blue-600 rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-blue-900">
             Total Sales
             (UGX)
           </p>
-
-          <h2 className="text-2xl font-bold text-gray-500 mt-2">
+          <HandCoins
+            size={20}
+            className="text-blue-600"
+          />
+          </div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
             {formatCurrency(
               combinedSales
             )}
@@ -729,13 +993,18 @@ if (!isAdmin) {
 
         {businessType ===
           "salon" && (
-          <div className="bg-white rounded-2xl shadow border p-5">
+          <div className="bg-white border border-blue-600 rounded-2xl shadow border p-4 md:p-5">
+            <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-blue-900">
               Salon Revenue
               (UGX)
             </p>
-
-            <h2 className="text-2xl font-bold text-gray-500 mt-2">
+           <HandCoins
+            size={20}
+            className="text-blue-600"
+          />
+          </div>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
               {formatCurrency(
                 totalServiceSales
               )}
@@ -744,13 +1013,18 @@ if (!isAdmin) {
         )}
 
         {/* GROSS PROFIT */}
-        <div className="bg-white rounded-2xl shadow border p-5">
+        <div className="bg-white border border-green-500 rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-blue-900">
             Gross Profit
             (UGX)
           </p>
-
-          <h2 className="text-2xl font-bold text-gray-500 mt-2">
+           <Coins
+            size={20}
+            className="text-green-600"
+          />
+         </div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
             {formatCurrency(
               combinedProfit
             )}
@@ -759,13 +1033,18 @@ if (!isAdmin) {
 
         {businessType ===
           "salon" && (
-          <div className="bg-white rounded-2xl shadow border p-5">
+          <div className="bg-white border border-green-500 rounded-2xl shadow border p-4 md:p-5">
+            <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-blue-900">
               Salon Profit
               (UGX)
             </p>
-
-            <h2 className="text-2xl font-bold text-gray-500 mt-2">
+            <Coins
+            size={20}
+            className="text-green-600"
+          />
+         </div>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
               {formatCurrency(
                 serviceProfit
               )}
@@ -774,13 +1053,18 @@ if (!isAdmin) {
         )}
 
         {/* RENTALS */}
-        <div className="bg-white rounded-2xl shadow border p-5">
+        <div className="bg-white border border-blue-600 rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-blue-900">
             Rental Income
             (UGX)
           </p>
-
-          <h2 className="text-2xl font-bold text-gray-500 mt-2">
+          <HandCoins
+            size={20}
+            className="text-blue-600"
+          />
+         </div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
             {formatCurrency(
               rentalIncome
             )}
@@ -788,28 +1072,56 @@ if (!isAdmin) {
         </div>
 
         {/* EXPENSES */}
-        <div className="bg-white rounded-2xl shadow border p-5">
+        <div className="bg-white border border-red-500 rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-blue-900">
             Total Expenses
             (UGX)
           </p>
-
-          <h2 className="text-2xl font-bold text-gray-500 mt-2">
+          <Receipt
+            size={20}
+            className="text-red-600"
+          />
+         </div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
             {formatCurrency(
               totalExpenses
             )}
           </h2>
         </div>
 
+        {/* PURCHASES */}
+        <div className="bg-white border border-purple-600 rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
+          <p className="text-sm font-bold text-blue-900">
+            Total Purchases (UGX)
+          </p>
+          <ShoppingCart
+            size={20}
+            className="text-purple-600"
+          />
+         </div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
+            {formatCurrency(
+              totalPurchases
+            )}
+          </h2>
+        </div>
+
         {/* NET PROFIT */}
-        <div className="bg-white rounded-2xl shadow border p-5">
+        <div className="bg-white border border-green-500 rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-blue-900">
             Net Profit
             (UGX)
           </p>
-
+          <Coins
+            size={20}
+            className="text-green-600"
+          />
+         </div>
           <h2
-            className={`text-2xl font-bold mt-2 ${
+            className={`text-lg sm:text-xl md:text-2xl font-bold mt-2 break-words ${
               netProfit >= 0
                 ? "text-gray-500"
                 : "text-red-600"
@@ -822,13 +1134,18 @@ if (!isAdmin) {
         </div>
 
         {/* GROSS MARGIN */}
-        <div className="bg-white rounded-2xl shadow border p-5">
+        <div className="bg-white rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-blue-900">
             Gross Profit
             Margin
           </p>
-
-          <h2 className="text-2xl font-bold text-gray-500 mt-2">
+          <TrendingUp
+            size={20}
+            className="text-green-600"
+          />
+         </div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
             {grossProfitMargin.toFixed(
               2
             )}
@@ -837,13 +1154,18 @@ if (!isAdmin) {
         </div>
 
         {/* NET MARGIN */}
-        <div className="bg-white rounded-2xl shadow border p-5">
+        <div className="bg-white rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-blue-900">
             Net Profit
             Margin
           </p>
-
-          <h2 className="text-2xl font-bold text-gray-500 mt-2">
+          <TrendingUp
+            size={20}
+            className="text-green-600"
+          />
+         </div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
             {netProfitMargin.toFixed(
               2
             )}
@@ -852,13 +1174,18 @@ if (!isAdmin) {
         </div>
 
         {/* INVENTORY */}
-        <div className="bg-white rounded-2xl shadow border p-5">
+        <div className="bg-white border border-purple-600 rounded-2xl shadow border p-4 md:p-5">
+          <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-blue-900">
             Inventory Cost
             (UGX)
           </p>
-
-          <h2 className="text-2xl font-bold text-gray-500 mt-2">
+          <Package
+            size={20}
+            className="text-purple-600"
+          />
+          </div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500 mt-2 break-words">
             {formatCurrency(
               inventoryCost
             )}
@@ -867,7 +1194,7 @@ if (!isAdmin) {
       </div>
 
       {/* CHART */}
-      <div className="bg-white rounded-2xl shadow border p-6">
+      <div className="bg-white rounded-2xl shadow border p-4 md:p-6">
         <div className="mb-4">
           <h2 className="text-xl font-bold text-blue-900">
             Monthly
@@ -881,25 +1208,45 @@ if (!isAdmin) {
           </p>
         </div>
 
-        <div className="h-[400px]">
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-          >
+        <div className="overflow-x-auto">
+        <div className="min-w-[700px] h-[280px] sm:h-[350px] md:h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
             >
               <CartesianGrid strokeDasharray="3 3" />
 
-              <XAxis dataKey="month" />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 10 }}
+                interval={0}
+                angle={-30}
+                textAnchor="end"
+                height={60}
+              />
 
-              <YAxis />
+              <YAxis
+                tick={{ fontSize: 10 }}
+                width={50}
+              />
 
-              <Tooltip />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "10px",
+                  fontSize: "12px",
+                }}
+                 formatter={(value, name) => [
+                  formatCurrency(
+                    Number(value)
+                  ),
+                  name,
+                ]}
+                />
 
+              <Legend />
               <Bar
                 dataKey="sales"
-                fill="#93c5fd"
+                fill="#7bb0ff"
                 radius={[
                   4,
                   4,
@@ -910,7 +1257,7 @@ if (!isAdmin) {
 
               <Bar
                 dataKey="profit"
-                fill="#93c5fd"
+                fill="#5ace86"
                 radius={[
                   4,
                   4,
@@ -921,7 +1268,7 @@ if (!isAdmin) {
 
               <Bar
                 dataKey="expenses"
-                fill="#93c5fd"
+                fill="#eb7a7a"
                 radius={[
                   4,
                   4,
@@ -932,7 +1279,146 @@ if (!isAdmin) {
             </BarChart>
           </ResponsiveContainer>
         </div>
+        </div>
       </div>
+
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-6xl mx-auto">
+  {/* TOP PRODUCTS */}
+  <div className="bg-white rounded-2xl shadow border p-4 md:p-6">
+  <h2 className="text-lg md:text-xl font-bold text-blue-900 mb-4">
+    Top Selling Products
+  </h2>
+
+  <div className="h-[300px] md:h-[400px]">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+    >
+      <PieChart>
+        <Pie
+          data={topProductsData}
+          dataKey="value"
+          nameKey="name"
+          outerRadius={120}
+          labelLine={false}
+          label={({ percent }) =>
+            (percent ?? 0) > 0.05
+              ? `${(
+                  (percent ?? 0) *
+                  100
+                ).toFixed(0)}%`
+              : ""
+          }
+        >
+          {topProductsData.map(
+            (_, index) => (
+              <Cell
+                key={index}
+                fill={
+                  COLORS[
+                    index %
+                      COLORS.length
+                  ]
+                }
+              />
+            )
+          )}
+        </Pie>
+
+        <Tooltip
+          formatter={(
+            value,
+            name
+          ) => [
+            formatCurrency(
+              Number(value)
+            ),
+            name,
+          ]}
+        />
+
+        <Legend
+          layout="horizontal"
+          verticalAlign="bottom"
+          align="center"
+          wrapperStyle={{
+            fontSize: "12px",
+          }}
+        />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
+  {/* EXPENSES */}
+  <div className="bg-white rounded-2xl shadow border p-4 md:p-6">
+  <h2 className="text-lg md:text-xl font-bold text-blue-900 mb-4">
+      Top Expense Categories
+    </h2>
+
+    <div className="h-[300px] md:h-[400px]">
+      <ResponsiveContainer
+       width="100%"
+       height="100%"
+      >
+        <PieChart>
+          <Pie
+            data={expensePieData}
+            dataKey="value"
+            nameKey="name"
+            outerRadius={120}
+            labelLine={false}
+            label={({ percent }) =>
+              (percent ?? 0) > 0.05
+                ? `${(
+                    (percent ?? 0) *
+                    100
+                  ).toFixed(0)}%`
+                : ""
+            }
+          >
+            {expensePieData.map(
+              (_, index) => (
+                <Cell
+                  key={index}
+                  fill={
+                  COLORS[
+                    index %
+                      COLORS.length
+                  ]
+                }
+                />
+              )
+            )}
+          </Pie>
+
+          <Tooltip
+            formatter={(
+              value,
+              name
+            ) => [
+              formatCurrency(
+                Number(
+                  value
+                )
+              ),
+               name,
+            ]}
+          />
+          <Legend
+          layout="horizontal"
+          verticalAlign="bottom"
+          align="center"
+          wrapperStyle={{
+            fontSize: "12px",
+          }}
+        />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+
+</div>
     </div>
   );
 }

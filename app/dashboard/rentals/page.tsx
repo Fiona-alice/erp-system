@@ -7,6 +7,7 @@ import { formatCurrency, } from "@/lib/formatCurrency";
 import { formatDate } from "@/lib/formatDate";
 import { getBusinessId } from "@/lib/getBusinessId";
 import { logStockMovement } from "@/lib/logStockMovement";
+import { Search, X } from "lucide-react";
 
 
 type Customer = {
@@ -657,19 +658,19 @@ export default function RentalsPage() {
   return (
     <div>
       {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Rentals
         </h1>
 
-        <p className="text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 mt-1">
           Manage rented products
         </p>
       </div>
 
       {/* TOOLBAR */}
-      <div className="bg-white p-2 rounded-lg shadow mb-3 flex flex-wrap gap-2 items-center justify-between text-sm">
-        <div className="flex gap-3">
+      <div className="bg-white p-2 rounded-lg shadow mb-3 flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
           {/* ADD */}
           <button
             onClick={() => {
@@ -679,7 +680,7 @@ export default function RentalsPage() {
 
               setIsOpen(true);
             }}
-            className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-100"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-md hover:bg-gray-100 text-sm"
           >
             New
           </button>
@@ -693,7 +694,7 @@ export default function RentalsPage() {
                 selectedRental
               )
             }
-           className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50"
+           className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm disabled:opacity-50"
           >
             Edit
           </button>
@@ -711,7 +712,7 @@ export default function RentalsPage() {
 
               setReturnModalOpen(true);
              }}
-            className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50"
+           className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm disabled:opacity-50"
           >
             Return
           </button>
@@ -726,7 +727,7 @@ export default function RentalsPage() {
                 selectedRental
               )
             }
-            className="bg-gray-100 text-blue-700 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm disabled:opacity-50"
           >
             Delete
           </button>
@@ -734,57 +735,88 @@ export default function RentalsPage() {
         </div>
 
         {/* SEARCH */}
-        <input
-          type="text"
-          placeholder="Search rentals..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          className="border px-2 py-1.5 rounded-md w-56 text-sm"
-        />
+       <div className="relative w-full md:w-50">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="
+              w-full
+              border
+              rounded-md
+              pl-9
+              pr-10
+              py-1.5
+              text-sm
+              text-gray-900
+            "
+          />
+
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="
+                absolute
+                right-3
+                top-1/2
+                -translate-y-1/2
+                text-gray-400
+                hover:text-gray-700
+              "
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-xl shadow border border-gray-200">
          <div className="overflow-x-auto">
         <div className="max-h-[400px] overflow-y-auto">
-        <table className="w-full text-sm border-collapse">
+        <table className="min-w-[800px] w-full text-sm border-collapse">
           <thead className="bg-gray-100 sticky top-0 z-10">
             <tr>
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Customer
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Product
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Qty
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Fee
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Total
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Start
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Return Date
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Actual Return Date
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Status
               </th>
             </tr>
@@ -807,47 +839,47 @@ export default function RentalsPage() {
                       : ""
                   }`}
                 >
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                     {
                       rental.customers
                         ?.name
                     }
                   </td>
 
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                     {
                       rental.products
                         ?.name
                     }
                   </td>
 
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                     {rental.quantity} {rental.products?.units?.short_name}
                   </td>
 
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                     UGX {formatCurrency(rental.rental_fee)}
                   </td>
 
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                    UGX {formatCurrency(rental.total_amount)}
                   </td>
 
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                     {formatDate(rental.start_date)}
                   </td>
 
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                     {formatDate(rental.return_date)}
                   </td>
 
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                     {rental.actual_return_date
                       ? formatDate(rental.actual_return_date)
                       : "-"}
                   </td>
 
-                  <td className="p-2 text-gray-700 border border-gray-200">
+                  <td className="px-3 p-2 text-gray-700 border border-gray-200">
                     {(() => {
                       let label = "Ongoing";
                       let classes =
@@ -908,8 +940,7 @@ export default function RentalsPage() {
   <div className="fixed inset-0 bg-black/40" />
 
   <div className="fixed inset-0 flex items-center justify-center p-4">
-    <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-md">
-
+    <Dialog.Panel className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
       <Dialog.Title className="text-xl font-bold mb-4">
         Return Rental
       </Dialog.Title>
@@ -929,7 +960,7 @@ export default function RentalsPage() {
                 e.target.value
               )
             }
-            className="w-full border p-3 rounded-lg"
+            className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
           />
         </div>
 
@@ -944,7 +975,7 @@ export default function RentalsPage() {
               );
             }
           }}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+          className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
         >
           Confirm Return
         </button>
@@ -965,7 +996,7 @@ export default function RentalsPage() {
         <div className="fixed inset-0 bg-black/40" />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-md">
+           <Dialog.Panel className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <Dialog.Title className="text-2xl font-bold mb-4">
               {editingRental
                 ? "Edit Rental"
@@ -983,7 +1014,7 @@ export default function RentalsPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               >
                 <option value="">
                   Select Customer
@@ -1017,7 +1048,7 @@ export default function RentalsPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               >
                 <option value="">
                   Select Product
@@ -1056,7 +1087,7 @@ export default function RentalsPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+               className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
 
               {/* RENTAL FEE */}
@@ -1069,7 +1100,7 @@ export default function RentalsPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
 
               {/* START DATE */}
@@ -1081,7 +1112,7 @@ export default function RentalsPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+               className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
 
               {/* RETURN DATE */}
@@ -1093,7 +1124,7 @@ export default function RentalsPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+               className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
 
               {/* PREVIEW */}

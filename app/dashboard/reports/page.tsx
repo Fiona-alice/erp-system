@@ -100,14 +100,14 @@ const filteredReports =
   });
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Reports
         </h1>
 
-        <p className="text-gray-500 mt-1">
+        <p className="text-sm text-gray-500">
           Business reporting
           center
         </p>
@@ -115,18 +115,20 @@ const filteredReports =
 
       {/* TABLE */}
       <div className="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
-        <table className="w-full text-sm border-collapse">
+        <div className="overflow-x-auto">
+        <div className="max-h-[500px] overflow-y-auto">
+        <table className="min-w-[900px] w-full text-sm border-collapse">
           <thead className="bg-gray-100">
             <tr>
-              <th className="text-left p-3 border border-gray-200">
+              <th className="text-left px-3 py-2 border border-gray-200">
                 Report Name
               </th>
 
-              <th className="text-left p-3 border border-gray-200">
+              <th className="text-left px-3 py-2 border border-gray-200">
                 Type
               </th>
 
-              <th className="text-left p-3 border border-gray-200">
+              <th className="text-left px-3 py-2 border border-gray-200">
                 Description
               </th>
             </tr>
@@ -139,7 +141,7 @@ const filteredReports =
                 className="border-t hover:bg-gray-50"
               >
                 {/* LINK */}
-                <td className="p-3 border border-gray-200">
+                <td className="px-3 py-2 border border-gray-200">
                   <Link
                     href={report.href}
                     className="text-blue-700 hover:underline font-medium"
@@ -149,12 +151,12 @@ const filteredReports =
                 </td>
 
                 {/* TYPE */}
-                <td className="p-3 text-gray-600 border border-gray-200">
+                <td className="px-3 py-2 text-gray-600 border border-gray-200">
                   {report.type}
                 </td>
 
                 {/* DESCRIPTION */}
-                <td className="p-3 text-gray-500 border border-gray-200">
+                <td className="px-3 py-2 text-gray-500 border border-gray-200">
                   {
                     report.description
                   }
@@ -164,6 +166,8 @@ const filteredReports =
           </tbody>
         </table>
       </div>
+    </div>
+    </div>
     </div>
   );
 }

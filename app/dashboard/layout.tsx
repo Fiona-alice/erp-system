@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getBusinessId } from "@/lib/getBusinessId";
@@ -21,6 +21,7 @@ import {
   LogOut,
   User,
   Settings,
+  X,
   Sparkles,
 } from "lucide-react";
 
@@ -35,7 +36,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-
+  const pathname = usePathname();
   const [open, setOpen] = useState(true);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -44,6 +45,7 @@ export default function DashboardLayout({
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [businessType, setBusinessType,] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -84,9 +86,9 @@ export default function DashboardLayout({
       setCheckingAuth(false);
 
       const businessId =
-  await getBusinessId();
+       await getBusinessId();
 
-    const { data: business } =
+      const { data: business } =
       await supabase
         .from("businesses")
         .select("logo_url")
@@ -107,14 +109,14 @@ export default function DashboardLayout({
           loadBusinessType();
         }, []);
 
-  async function loadBusinessType() {
-  const type =
-    await getBusinessType();
+      async function loadBusinessType() {
+      const type =
+        await getBusinessType();
 
-  if (type) {
-    setBusinessType(type);
-  }
-}
+      if (type) {
+        setBusinessType(type);
+      }
+    }
 
   async function logout() {
     await supabase.auth.signOut();
@@ -130,11 +132,50 @@ export default function DashboardLayout({
   }
 
   const role = userProfile?.role || "";
+ 
+  const navClass = (path: string) =>
+  `flex items-center ${
+    open ? "justify-start gap-3 px-3" : "justify-center"
+  } py-3 rounded-lg transition ${
+    pathname === path
+      ? "bg-blue-400 text-white"
+      : "hover:bg-gray-500"
+  }`;
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
+
+        {mobileMenuOpen && (
+          <div
+            className="
+              fixed
+              inset-0
+              bg-black/50
+              z-40
+              md:hidden
+            "
+            onClick={() =>
+              setMobileMenuOpen(false)
+            }
+          />
+        )}  
+
       {/* SIDEBAR */}
-      <aside className="h-screen overflow-y-auto bg-gray-600 text-white flex-shrink-0">
+      <aside
+        className={`fixed md:relative top-0 left-0 h-screen bg-gray-600 text-white z-50 transition-transform duration-300 overflow-y-auto
+          ${
+            mobileMenuOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }
+          md:translate-x-0
+          ${
+            open
+              ? "w-64"
+              : "w-25"
+          }
+        `}
+      >
        
         {/* HEADER */}
         <div className="px-3 flex items-center justify-between border-b border-gray-600">
@@ -213,15 +254,15 @@ export default function DashboardLayout({
           <>
         <Link
         href="/dashboard"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
-      >
+        className={navClass("/dashboard")}
+       >
         <LayoutDashboard size={20} />
         {open && "Dashboard"}
       </Link>
 
       <Link
         href="/dashboard/products"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+       className={navClass("/dashboard/products")}
       >
         <Package size={20} />
         {open && "Products"}
@@ -231,7 +272,7 @@ export default function DashboardLayout({
         <>
           <Link
             href="/dashboard/services"
-            className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+            className={navClass("/dashboard/services")}
           >
             <Sparkles size={20} />
             {open && "Services"}
@@ -241,7 +282,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/categories"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/categories")}
       >
         <Layers size={20} />
         {open && "Categories"}
@@ -249,7 +290,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/sales"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/sales")}
       >
         <ShoppingCart size={20} />
         {open && "Sales"}
@@ -259,7 +300,7 @@ export default function DashboardLayout({
         <>
         <Link
             href="/dashboard/service-sales"
-            className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+           className={navClass("/dashboard/service-sales")}
           >
             <ShoppingCart size={20} />
             {open && "Service Sales"}
@@ -269,7 +310,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/purchases"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/purchases")}
       >
         <Truck size={20} />
         {open && "Purchases"}
@@ -277,7 +318,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/rentals"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/rentals")}
       >
         <HandCoins size={20} />
         {open && "Rentals"}
@@ -285,7 +326,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/customers"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/customers")}
       >
         <Users size={20} />
         {open && "Customers"}
@@ -293,7 +334,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/expenses"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/expenses")}
       >
         <Receipt size={20} />
         {open && "Expenses"}
@@ -301,7 +342,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/stock-adjustment"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/stock-adjustment")}
       >
         <PenSquareIcon size={20} />
         {open && "Stock Adjustment"}
@@ -309,7 +350,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/reports"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/reports")}
       >
         <BarChart3 size={20} />
         {open && "Reports"}
@@ -317,7 +358,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/users"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/users")}
       >
         <Users size={20} />
         {open && "Users"}
@@ -330,15 +371,15 @@ export default function DashboardLayout({
     <>
       <Link
         href="/dashboard/products"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
-      >
+       className={navClass("/dashboard/products")}
+            >
         <Package size={20} />
         {open && "Products"}
       </Link>
 
       <Link
         href="/dashboard/sales"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/sales")}
       >
         <ShoppingCart size={20} />
         {open && "Sales"}
@@ -346,7 +387,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/rentals"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+       className={navClass("/dashboard/rentals")}
       >
         <HandCoins size={20} />
         {open && "Rentals"}
@@ -354,7 +395,7 @@ export default function DashboardLayout({
 
       <Link
         href="/dashboard/customers"
-        className="flex items-center gap-2 p-2 rounded hover:bg-gray-600"
+        className={navClass("/dashboard/customers")}
       >
         <Users size={20} />
         {open && "Customers"}
@@ -364,8 +405,24 @@ export default function DashboardLayout({
         </nav>
       </aside>
 
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() =>
+            setMobileMenuOpen(true)
+          }
+          className="
+            p-2
+            bg-white
+            rounded-lg
+            shadow
+          "
+        >
+          <Menu size={22} />
+        </button>
+      </div>
+
       {/* MAIN CONTENT */}
-      <main className="flex-1 h-screen overflow-y-auto scroll-smooth p-4">{children}</main>
+      <main className="flex-1 h-screen overflow-y-auto p-3 sm:p-4 md:p-6">{children}</main>
     </div>
   );
 }

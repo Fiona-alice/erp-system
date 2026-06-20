@@ -350,25 +350,52 @@ const matchesCategory =
     );
   }
 
+  const totalSalesAmount =
+  reportSales.reduce(
+    (sum, sale) =>
+      sum +
+      Number(
+        sale.total_amount
+      ),
+    0
+  );
+
+  const totalProfit =
+  reportSales.reduce(
+    (sum, sale) =>
+      sum +
+      Number(sale.profit),
+    0
+  );
+  
+  const overallMargin =
+  totalSalesAmount > 0
+    ? (
+        (totalProfit /
+          totalSalesAmount) *
+        100
+      ).toFixed(2)
+    : "0.00";
+
   return (
     <div className="space-y-6">
 
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Sales Report
         </h1>
 
-        <p className="text-gray-500">
+        <p className="text-sm text-gray-500">
           Filtered business analytics
         </p>
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white border rounded-xl p-4 flex flex-wrap gap-3 items-start">
+      <div className="bg-white border rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
 
         {/* PRODUCTS */}
-        <div className="min-w-[260px]">
+        <div className="w-full">
           <Select
             isMulti
             options={productOptions}
@@ -396,7 +423,7 @@ const matchesCategory =
         </div>
 
         {/* CATEGORIES */}
-        <div className="min-w-[260px]">
+        <div className="w-full">
           <Select
             isMulti
             options={categoryOptions}
@@ -432,7 +459,7 @@ const matchesCategory =
               e.target.value
             )
           }
-          className="border px-3 py-2 rounded-lg"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
         />
 
         {/* END DATE */}
@@ -444,13 +471,14 @@ const matchesCategory =
               e.target.value
             )
           }
-          className="border px-3 py-2 rounded-lg"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
         />
 
         {/* CLEAR */}
         <button
           onClick={clearFilters}
-          className="bg-white border text-blue-900 px-3 py-2 rounded-lg hover:bg-blue-50 text-sm"
+          className="w-full md:w-auto bg-white border text-blue-900 px-4 py-2 rounded-lg hover:bg-blue-50
+          text-sm font-medium"
         >
           Clear
         </button>
@@ -458,7 +486,7 @@ const matchesCategory =
       </div>
 
       {/* EXPORT ICONS */}
-      <div className="flex justify-end gap-2 mb-2">
+      <div className="flex justify-between sm:justify-end gap-2">
 
         {/* PDF */}
         <button
@@ -490,31 +518,35 @@ const matchesCategory =
         <div className="overflow-x-auto">
         <div className="max-h-[500px] overflow-y-auto">
 
-          <table className="w-full text-sm border-collapse">
+          <table className="min-w-[900px] w-full text-sm border-collapse">
 
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Product
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Category
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Qty
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Sales
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Profit
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
+                  Margin %
+                </th>
+
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Date
                 </th>
               </tr>
@@ -526,7 +558,7 @@ const matchesCategory =
               {!hasFilters ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="p-8 text-center text-gray-500"
                   >
                     Select filters to generate a report
@@ -537,7 +569,7 @@ const matchesCategory =
                 /* NO RESULTS */
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="p-8 text-center text-gray-500"
                   >
                     No results found
@@ -554,39 +586,50 @@ const matchesCategory =
                         key={sale.id}
                         className="border-t hover:bg-gray-50"
                       >
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {
                             sale.products
                               ?.name
                           }
                         </td>
 
-                        <td className="p-3 text-blue-900 border border-gray-200">
+                        <td className="px-3 py-2 text-blue-900 border border-gray-200">
                           {sale.products
                             ?.categories
                             ?.name ||
                             "Uncategorized"}
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {
                             sale.quantity
                           }
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {formatCurrency(
                             sale.total_amount
                           )}
                         </td>
 
-                        <td className="p-3 text-green-700 border border-gray-200">
+                        <td className="px-3 py-2 text-green-700 border border-gray-200">
                           {formatCurrency(
                             sale.profit
                           )}
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
+                          {sale.total_amount > 0
+                            ? (
+                                (sale.profit /
+                                  sale.total_amount) *
+                                100
+                              ).toFixed(2)
+                            : "0"}
+                          %
+                        </td>
+
+                        <td className="px-3 py-2 border border-gray-200">
                         {formatDate(sale.sale_date)}
                         </td>
                       </tr>
@@ -595,28 +638,32 @@ const matchesCategory =
 
                   {/* TOTAL ROW */}
                   <tr className="bg-gray-50 font-bold border-t">
-                    <td className="p-3 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200">
                       TOTAL
                     </td>
 
                     <td></td>
 
-                    <td className="p-3 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200">
                       {
                         totals.quantity
                       }
                     </td>
 
-                    <td className="p-3 text-blue-900 border border-gray-200">
+                    <td className="px-3 py-2 text-blue-900 border border-gray-200">
                       {formatCurrency(
                         totals.sales
                       )}
                     </td>
 
-                    <td className="p-3 text-green-700 border border-gray-200">
+                    <td className="px-3 py-2 text-green-700 border border-gray-200">
                       {formatCurrency(
                         totals.profit
                       )}
+                    </td>
+
+                    <td className="px-3 py-2 border border-gray-200 font-bold">
+                      {overallMargin}%
                     </td>
 
                     <td></td>

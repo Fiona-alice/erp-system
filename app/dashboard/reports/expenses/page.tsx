@@ -262,59 +262,59 @@ export default function ExpenseReportPage() {
     <div className="space-y-6">
 
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Expense Report
         </h1>
 
-        <p className="text-gray-500">
+        <p className="text-sm text-gray-500">
           Analyze expenses by category
           and period
         </p>
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white border rounded-xl p-4 flex flex-wrap gap-3 items-start">
+      <div className="bg-white border rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
 
         {/* CATEGORY */}
-        <div className="min-w-[260px]">
+        <div className="w-full">
           <Select
-  isMulti
-  options={categoryOptions}
-  value={selectedCategories}
-  onChange={(value) =>
-    setSelectedCategories(
-      value as OptionType[]
-    )
-  }
-  placeholder="Select categories..."
+            isMulti
+            options={categoryOptions}
+            value={selectedCategories}
+            onChange={(value) =>
+              setSelectedCategories(
+                value as OptionType[]
+              )
+            }
+            placeholder="Select categories..."
 
-  menuPortalTarget={
-    typeof window !== "undefined"
-      ? document.body
-      : null
-  }
+            menuPortalTarget={
+              typeof window !== "undefined"
+                ? document.body
+                : null
+            }
 
-  menuPosition="fixed"
+            menuPosition="fixed"
 
-  styles={{
-    control: (base) => ({
-      ...base,
-      borderRadius: "0.5rem",
-      minHeight: "42px",
-    }),
+            styles={{
+              control: (base) => ({
+                ...base,
+                borderRadius: "0.5rem",
+                minHeight: "42px",
+              }),
 
-    menuPortal: (base) => ({
-      ...base,
-      zIndex: 9999,
-    }),
+              menuPortal: (base) => ({
+                ...base,
+                zIndex: 9999,
+              }),
 
-    menu: (base) => ({
-      ...base,
-      zIndex: 9999,
-    }),
-  }}
-/>
+              menu: (base) => ({
+                ...base,
+                zIndex: 9999,
+              }),
+            }}
+          />
         </div>
 
         {/* START DATE */}
@@ -326,7 +326,7 @@ export default function ExpenseReportPage() {
               e.target.value
             )
           }
-          className="border px-3 py-2 rounded-lg"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
         />
 
         {/* END DATE */}
@@ -338,7 +338,7 @@ export default function ExpenseReportPage() {
               e.target.value
             )
           }
-          className="border px-3 py-2 rounded-lg"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
         />
 
         {/* CLEAR */}
@@ -346,7 +346,8 @@ export default function ExpenseReportPage() {
           onClick={
             clearFilters
           }
-          className="bg-white border text-blue-900 px-3 py-2 rounded-lg hover:bg-blue-50 text-sm"
+          className="w-full md:w-auto bg-white border text-blue-900 px-4 py-2 rounded-lg hover:bg-blue-50
+          text-sm font-medium"
         >
           Clear
         </button>
@@ -354,8 +355,7 @@ export default function ExpenseReportPage() {
       </div>
 
       {/* EXPORTS */}
-      <div className="flex justify-end gap-2">
-
+      <div className="flex justify-between sm:justify-end gap-2">
         <button
           title="Export PDF"
           className="p-1.5 rounded-md hover:bg-gray-100"
@@ -386,32 +386,32 @@ export default function ExpenseReportPage() {
         <div className="overflow-x-auto">
         <div className="max-h-[500px] overflow-y-auto">
 
-          <table className="w-full text-sm">
+          <table className="min-w-[900px] w-full text-sm border-collapse">
 
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
 
-                <th className="p-3 text-left">
+                <th className="px-3 py-2 text-left">
                   Title
                 </th>
 
-                <th className="p-3 text-left">
+                <th className="px-3 py-2 text-left">
                   Category
                 </th>
 
-                <th className="p-3 text-left">
+                <th className="px-3 py-2 text-left">
                   Amount
                 </th>
 
-                <th className="p-3 text-left">
+                <th className="px-3 py-2 text-left">
                   Notes
                 </th>
 
-                <th className="p-3 text-left">
+                <th className="px-3 py-2 text-left">
                   Expense Date
                 </th>
 
-                <th className="p-3 text-left">
+                <th className="px-3 py-2 text-left">
                   Created
                 </th>
 
@@ -423,7 +423,7 @@ export default function ExpenseReportPage() {
               {!hasFilters ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="p-8 text-center text-gray-500"
                   >
                     Select filters to
@@ -434,7 +434,7 @@ export default function ExpenseReportPage() {
                 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="p-8 text-center text-gray-500"
                   >
                     No results found
@@ -450,35 +450,35 @@ export default function ExpenseReportPage() {
                         }
                         className="border-t hover:bg-gray-50"
                       >
-                        <td className="p-3">
+                        <td className="px-3 py-2">
                           {
                             expense.title
                           }
                         </td>
 
-                        <td className="p-3 text-blue-900">
+                        <td className="px-3 py-2 text-blue-900">
                           {
                             expense.category
                           }
                         </td>
 
-                        <td className="p-3 text-red-600">
+                        <td className="px-3 py-2 text-red-600">
                           {formatCurrency(
                             expense.amount
                           )}
                         </td>
 
-                        <td className="p-3">
+                        <td className="px-3 py-2">
                           {expense.notes}
                         </td>
 
-                        <td className="p-3">
+                        <td className="px-3 py-2">
                           {formatDate(
                             expense.expense_date
                           )}
                         </td>
 
-                        <td className="p-3">
+                        <td className="px-3 py-2">
                           {formatDate(
                             expense.created_at
                           )}
@@ -490,13 +490,13 @@ export default function ExpenseReportPage() {
                   {/* TOTAL ROW */}
                   <tr className="bg-gray-50 font-bold border-t">
 
-                    <td className="p-3">
+                    <td className="px-3 py-2">
                       TOTAL
                     </td>
 
                     <td></td>
 
-                    <td className="p-3 text-red-600">
+                    <td className="px-3 py-2 text-red-600">
                       {formatCurrency(
                         totalExpenses
                       )}

@@ -7,6 +7,7 @@ import { formatCurrency } from "@/lib/formatCurrency";
 import { formatDate } from "@/lib/formatDate";
 import { getBusinessId } from "@/lib/getBusinessId";
 import { logStockMovement } from "@/lib/logStockMovement";
+import { Search, X } from "lucide-react";
 
 type Product = {
   id: number;
@@ -460,25 +461,25 @@ export default function StockAdjustmentPage() {
       : lossReasons;
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Stock Adjustments
         </h1>
 
-        <p className="text-gray-500">
+        <p className="text-sm text-gray-500 mt-1">
           Inventory gains & losses
         </p>
       </div>
 
       {/* TOOLBAR */}
-      <div className="bg-white p-2 rounded-lg shadow mb-3 flex flex-wrap gap-2 items-center justify-between text-sm">
-        <div className="flex gap-3">
+       <div className="bg-white p-2 rounded-lg shadow mb-3 flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
+        <div className="flex flex-wrap gap-2">
           {/* NEW */}
           <button
             onClick={openNewModal}
-            className="bg-gray-100 text-blue-900 border px-3 py-1.5 rounded-md hover:bg-gray-200 text-sm"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-md hover:bg-gray-100 text-sm"
           >
             New
           </button>
@@ -492,7 +493,7 @@ export default function StockAdjustmentPage() {
                 selectedAdjustment
               )
             }
-            className="bg-gray-100 text-blue-900 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50 text-sm"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm disabled:opacity-50"
           >
             Edit
           </button>
@@ -506,60 +507,91 @@ export default function StockAdjustmentPage() {
                 selectedAdjustment
               )
             }
-            className="bg-gray-100 text-blue-900 border px-3 py-1.5 rounded-md hover:bg-gray-200 disabled:opacity-50 text-sm"
+            className="border bg-gray-50 text-blue-700 px-2.5 py-1 rounded-lg hover:bg-gray-100 text-sm disabled:opacity-50"
           >
             Delete
           </button>
         </div>
 
         {/* SEARCH */}
-        <input
-          type="text"
-          placeholder="Search adjustments..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          className="border px-3 py-1.5 rounded-md w-64 text-sm"
-        />
+        <div className="relative w-full md:w-50">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="
+              w-full
+              border
+              rounded-md
+              pl-9
+              pr-10
+              py-1.5
+              text-sm
+              text-gray-900
+            "
+          />
+
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="
+                absolute
+                right-3
+                top-1/2
+                -translate-y-1/2
+                text-gray-400
+                hover:text-gray-700
+              "
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-xl shadow border border-gray-200">
          <div className="overflow-x-auto">
         <div className="max-h-[500px] overflow-y-auto">
-          <table className="w-full text-sm border-collapse">
+          <table className="min-w-[800px] w-full text-sm border-collapse">
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
-                <th className="p-2 text-left border border-gray-200">
+                <th className="px-3 p-2 text-left border border-gray-200">
                   Product
                 </th>
 
-                <th className="p-2 text-left border border-gray-200">
+                <th className="px-3 p-2 text-left border border-gray-200">
                   Type
                 </th>
 
-                <th className="p-2 text-left border border-gray-200">
+                <th className="px-3 p-2 text-left border border-gray-200">
                   Qty
                 </th>
 
-                <th className="p-2 text-left border border-gray-200">
+                <th className="px-3 p-2 text-left border border-gray-200">
                   Unit Cost
                 </th>
 
-                <th className="p-2 text-left border border-gray-200">
+                <th className="px-3 p-2 text-left border border-gray-200">
                   Total Cost
                 </th>
 
-                <th className="p-2 text-left border border-gray-200">
+                <th className="px-3 p-2 text-left border border-gray-200">
                   P&L Impact
                 </th>
 
-                <th className="p-2 text-left border border-gray-200">
+                <th className="px-3 p-2 text-left border border-gray-200">
                   Reason
                 </th>
 
-                <th className="p-2 text-left border border-gray-200">
+                <th className="px-3 p-2 text-left border border-gray-200">
                   Date
                 </th>
               </tr>
@@ -582,7 +614,7 @@ export default function StockAdjustmentPage() {
                         : ""
                     }`}
                   >
-                    <td className="p-2 border border-gray-200">
+                    <td className="px-3 p-2 border border-gray-200">
                       {
                         adjustment.products
                           ?.name
@@ -590,7 +622,7 @@ export default function StockAdjustmentPage() {
                     </td>
 
                     <td
-                      className={`p-2 border border-gray-200 font-medium ${
+                      className={`px-3 p-2 border border-gray-200 font-medium ${
                         adjustment.type ===
                         "IN"
                           ? "text-green-700"
@@ -600,27 +632,27 @@ export default function StockAdjustmentPage() {
                       {adjustment.type}
                     </td>
 
-                    <td className="p-2 border border-gray-200">
+                    <td className="px-3 p-2 border border-gray-200">
                       {
                         adjustment.quantity
                       }
                     </td>
 
-                    <td className="p-2 border border-gray-200">
+                    <td className="px-3 p-2 border border-gray-200">
                       UGX{" "}
                       {formatCurrency(
                         adjustment.unit_cost
                       )}
                     </td>
 
-                    <td className="p-2 border border-gray-200">
+                    <td className="px-3 p-2 border border-gray-200">
                       UGX{" "}
                       {formatCurrency(
                         adjustment.total_cost
                       )}
                     </td>
 
-                    <td className={`p-2 border border-gray-200 font-medium ${
+                    <td className={`px-3 p-2 border border-gray-200 font-medium ${
                         adjustment.pnl_amount >= 0
                        ? "text-green-700"
                        : "text-red-600"
@@ -632,11 +664,11 @@ export default function StockAdjustmentPage() {
                        )}
                       </td>
 
-                    <td className="p-2 border border-gray-200">
+                    <td className="px-3 p-2 border border-gray-200">
                       {adjustment.reason}
                     </td>
 
-                    <td className="p-2 border border-gray-200">
+                    <td className="px-3 p-2 border border-gray-200">
                       {formatDate(
                         adjustment.created_at
                       )}
@@ -660,7 +692,7 @@ export default function StockAdjustmentPage() {
         <div className="fixed inset-0 bg-black/40" />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-md">
+          <Dialog.Panel className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <Dialog.Title className="text-xl font-bold mb-4 text-blue-900">
               {editingAdjustment
                 ? "Edit Adjustment"
@@ -676,7 +708,7 @@ export default function StockAdjustmentPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               >
                 <option value="">
                   Select Product
@@ -706,7 +738,7 @@ export default function StockAdjustmentPage() {
 
                   setReason("");
                 }}
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               >
                 <option value="IN">
                   Stock Gain (+)
@@ -725,7 +757,7 @@ export default function StockAdjustmentPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               >
                 <option value="">
                   Select Reason
@@ -751,7 +783,7 @@ export default function StockAdjustmentPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
 
               {/* UNIT COST */}
@@ -764,7 +796,7 @@ export default function StockAdjustmentPage() {
                     e.target.value
                   )
                 }
-                className="w-full border p-3 rounded-lg"
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
 
               {/* TOTAL COST */}

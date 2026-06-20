@@ -150,14 +150,7 @@ export default function ProfilePage() {
           Security
         </button>
 
-        <button
-          onClick={() => setTab("settings")}
-          className={`pb-2 ${
-            tab === "settings" ? "border-b-2 border-blue-900" : ""
-          }`}
-        >
-          Settings
-        </button>
+        
       </div>
 
       {/* PROFILE TAB */}

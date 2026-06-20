@@ -378,21 +378,21 @@ export default function PurchaseReportPage() {
     <div className="space-y-6">
 
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-blue-900">
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
           Purchase Report
         </h1>
 
-        <p className="text-gray-500">
+        <p className="text-sm text-gray-500">
           Purchase and procurement analytics
         </p>
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white border rounded-xl p-4 flex flex-wrap gap-3 items-start">
+      <div className="bg-white border rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
 
         {/* PRODUCTS */}
-        <div className="min-w-[260px]">
+        <div className="w-full">
           <Select
             isMulti
             options={productOptions}
@@ -430,7 +430,7 @@ export default function PurchaseReportPage() {
         </div>
 
         {/* CATEGORIES */}
-        <div className="min-w-[260px]">
+        <div className="w-full">
           <Select
             isMulti
             options={
@@ -477,7 +477,7 @@ export default function PurchaseReportPage() {
               e.target.value
             )
           }
-          className="border px-3 py-2 rounded-lg"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
         />
 
         <input
@@ -488,12 +488,13 @@ export default function PurchaseReportPage() {
               e.target.value
             )
           }
-          className="border px-3 py-2 rounded-lg"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
         />
 
         <button
           onClick={clearFilters}
-          className="bg-white border text-blue-900 px-3 py-2 rounded-lg hover:bg-blue-50 text-sm"
+          className="w-full md:w-auto bg-white border text-blue-900 px-4 py-2 rounded-lg hover:bg-blue-50
+          text-sm font-medium"
         >
           Clear
         </button>
@@ -501,7 +502,7 @@ export default function PurchaseReportPage() {
       </div>
 
       {/* EXPORT */}
-      <div className="flex justify-end gap-2 mb-2">
+      <div className="flex justify-between sm:justify-end gap-2">
 
         <button className="p-1.5 rounded-md hover:bg-gray-100">
           <FileText
@@ -527,36 +528,36 @@ export default function PurchaseReportPage() {
          <div className="overflow-x-auto">
         <div className="max-h-[500px] overflow-y-auto">
 
-          <table className="w-full text-sm border-collapse">
+          <table className="min-w-[900px] w-full text-sm border-collapse">
 
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Product
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Category
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Qty
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="v text-left border border-gray-200">
                   Unit Cost
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2text-left border border-gray-200">
                   Other Costs
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Total
                 </th>
 
-                <th className="p-3 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200">
                   Date
                 </th>
 
@@ -598,7 +599,7 @@ export default function PurchaseReportPage() {
                         className="hover:bg-gray-50"
                       >
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {
                             purchase
                               .products
@@ -606,7 +607,7 @@ export default function PurchaseReportPage() {
                           }
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {purchase
                             .products
                             ?.categories
@@ -614,32 +615,32 @@ export default function PurchaseReportPage() {
                             "Uncategorized"}
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {
                             purchase.quantity
                           }
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {formatCurrency(
                             purchase.buying_price
                           )}
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {formatCurrency(
                             purchase.other_costs ||
                               0
                           )}
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {formatCurrency(
                             purchase.total_amount
                           )}
                         </td>
 
-                        <td className="p-3 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200">
                           {formatDate(
                             purchase.purchase_date
                           )}
@@ -652,13 +653,13 @@ export default function PurchaseReportPage() {
                   {/* TOTAL */}
                   <tr className="bg-gray-50 font-bold">
 
-                    <td className="p-3 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200">
                       TOTAL
                     </td>
 
                     <td className="border border-gray-200"></td>
 
-                    <td className="p-3 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200">
                       {
                         totals.quantity
                       }
@@ -666,13 +667,13 @@ export default function PurchaseReportPage() {
 
                     <td className="border border-gray-200"></td>
 
-                    <td className="p-3 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200">
                       {formatCurrency(
                         totals.otherCosts
                       )}
                     </td>
 
-                    <td className="p-3 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200">
                       {formatCurrency(
                         totals.cost
                       )}

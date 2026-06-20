@@ -5,6 +5,7 @@ import { Dialog } from "@headlessui/react";
 import { supabase } from "@/lib/supabase";
 import { getBusinessId } from "@/lib/getBusinessId";
 import { formatDate } from "@/lib/formatDate";
+import { Search, X } from "lucide-react";
 
 type Category = {
   id: number;
@@ -24,6 +25,8 @@ export default function CategoriesPage() {
 
   const [selectedRow, setSelectedRow] =
     useState<Category | null>(null);
+
+  const [search, setSearch] = useState("");  
 
   const [businessId, setBusinessId] = useState<string>("");  
 
@@ -150,19 +153,19 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div>
       {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-blue-900">
+      <div className="mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-blue-900">
             Categories
           </h1>
-          <p className="text-gray-500">
+          <p className="text-sm text-gray-500 mt-1">
             Manage product categories
           </p>
-        </div>
       </div>
 
+      <div className="bg-white p-2 rounded-lg shadow mb-3 flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
+       
         <button
           onClick={() => {
             clearForm();
@@ -173,22 +176,65 @@ export default function CategoriesPage() {
           New Category
         </button>
 
+        {/* SEARCH */}
+                <div className="relative w-full md:w-50">
+                  <Search
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+        
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="
+                      w-full
+                      border
+                      rounded-md
+                      pl-9
+                      pr-10
+                      py-1.5
+                      text-sm
+                      text-gray-900
+                    "
+                  />
+        
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="
+                        absolute
+                        right-3
+                        top-1/2
+                        -translate-y-1/2
+                        text-gray-400
+                        hover:text-gray-700
+                      "
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+        </div>
+
       {/* TABLE */}
-      <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow border border-gray-200">
          <div className="overflow-x-auto">
        <div className="max-h-[400px] overflow-y-auto">
-        <table className="w-full text-sm border-collapse">
+         <table className="min-w-[800px] w-full text-sm border-collapse">
           <thead className="bg-gray-100 sticky top-0 z-10">
             <tr>
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Category Name
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Created
               </th>
 
-              <th className="text-left p-2 border border-gray-200">
+              <th className="text-left px-3 p-2 border border-gray-200">
                 Actions
               </th>
             </tr>
@@ -197,26 +243,26 @@ export default function CategoriesPage() {
       <tbody>
     {categories.map((category) => (
       <tr key={category.id} className="hover:bg-gray-50">
-        <td className="p-2 font-medium text-blue-900 border border-gray-200">
+        <td className="px-3 p-2 font-medium text-blue-900 border border-gray-200">
           {category.name}
         </td>
 
-        <td className="p-2 text-gray-700 border border-gray-200">
+        <td className="px-3 p-2 text-gray-700 border border-gray-200">
           {formatDate(category.created_at)}
         </td>
 
-        <td className="p-2 border border-gray-200">
+        <td className="px-3 p-2 border border-gray-200">
           <div className="flex gap-2">
             <button
               onClick={() => openEdit(category)}
-              className="px-2 py-1 bg-gray-100 text-blue-900 border border-gray-200 rounded hover:bg-gray-200"
+              className="px-3 px-2 py-1 bg-gray-100 text-blue-900 border border-gray-200 rounded hover:bg-gray-200"
             >
               Edit
             </button>
 
             <button
               onClick={() => deleteCategory(category)}
-              className="px-2 py-1 bg-gray-100 text-blue-900 border border-gray-200 rounded hover:bg-gray-200"
+              className="px-3 px-2 py-1 bg-gray-100 text-blue-900 border border-gray-200 rounded hover:bg-gray-200"
             >
               Delete
             </button>
@@ -238,7 +284,7 @@ export default function CategoriesPage() {
         <div className="fixed inset-0 bg-black/40" />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-md">
+          <Dialog.Panel className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <Dialog.Title className="text-xl font-bold mb-4 text-blue-900">
               {selectedCategory
                 ? "Edit Category"
@@ -252,7 +298,7 @@ export default function CategoriesPage() {
                 setName(e.target.value)
               }
               placeholder="Category name"
-              className="w-full border p-3 rounded-lg mb-4"
+              className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
             />
 
             <button
