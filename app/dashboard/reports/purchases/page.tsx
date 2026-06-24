@@ -477,7 +477,7 @@ export default function PurchaseReportPage() {
               e.target.value
             )
           }
-          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         <input
@@ -488,7 +488,7 @@ export default function PurchaseReportPage() {
               e.target.value
             )
           }
-          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         <button
@@ -533,31 +533,31 @@ export default function PurchaseReportPage() {
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Product
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Category
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Qty
                 </th>
 
-                <th className="v text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Unit Cost
                 </th>
 
-                <th className="px-3 py-2text-left border border-gray-200">
+                <th className="px-3 py-2text-left border border-gray-200 text-gray-700">
                   Other Costs
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Total
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Date
                 </th>
 
@@ -599,7 +599,7 @@ export default function PurchaseReportPage() {
                         className="hover:bg-gray-50"
                       >
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {
                             purchase
                               .products
@@ -607,7 +607,7 @@ export default function PurchaseReportPage() {
                           }
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {purchase
                             .products
                             ?.categories
@@ -615,32 +615,32 @@ export default function PurchaseReportPage() {
                             "Uncategorized"}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {
                             purchase.quantity
                           }
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatCurrency(
                             purchase.buying_price
                           )}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatCurrency(
                             purchase.other_costs ||
                               0
                           )}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatCurrency(
                             purchase.total_amount
                           )}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatDate(
                             purchase.purchase_date
                           )}
@@ -653,33 +653,33 @@ export default function PurchaseReportPage() {
                   {/* TOTAL */}
                   <tr className="bg-gray-50 font-bold">
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       TOTAL
                     </td>
 
-                    <td className="border border-gray-200"></td>
+                    <td className="border border-gray-200 text-gray-700"></td>
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       {
                         totals.quantity
                       }
                     </td>
 
-                    <td className="border border-gray-200"></td>
+                    <td className="border border-gray-200 text-gray-700"></td>
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       {formatCurrency(
                         totals.otherCosts
                       )}
                     </td>
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       {formatCurrency(
                         totals.cost
                       )}
                     </td>
 
-                    <td className="border border-gray-200"></td>
+                    <td className="border border-gray-200 text-gray-700"></td>
 
                   </tr>
 

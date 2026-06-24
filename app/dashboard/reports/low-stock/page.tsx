@@ -290,11 +290,11 @@ export default function LowStockReportPage() {
 
           <thead className="bg-gray-100 sticky top-0 z-10">
             <tr>
-              <th className="px-3 py-2 text-left border border-gray-200">Product</th>
-              <th className="px-3 py-2 text-left border border-gray-200">Category</th>
-              <th className="px-3 py-2 text-left border border-gray-200">Stock</th>
-              <th className="px-3 py-2 text-left border border-gray-200">Minimum</th>
-              <th className="px-3 py-2 text-left border border-gray-200">Buying Price</th>
+              <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">Product</th>
+              <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">Category</th>
+              <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">Stock</th>
+              <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">Minimum</th>
+              <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">Buying Price</th>
             </tr>
           </thead>
 
@@ -322,9 +322,9 @@ export default function LowStockReportPage() {
               reportProducts.map((p) => (
                 <tr key={p.id} className="border-t">
 
-                  <td className="px-3 py-2 border border-gray-200">{p.name}</td>
+                  <td className="px-3 py-2 border border-gray-200 text-gray-700">{p.name}</td>
 
-                  <td className="px-3 py-2 border border-gray-200">
+                  <td className="px-3 py-2 border border-gray-200 text-gray-700">
                     {p.categories?.name || "Uncategorized"}
                   </td>
 
@@ -332,9 +332,9 @@ export default function LowStockReportPage() {
                     {p.stock_quantity}
                   </td>
 
-                  <td className="px-3 py-2 border border-gray-200">{p.minimum_stock}</td>
+                  <td className="px-3 py-2 border border-gray-200 text-gray-700">{p.minimum_stock}</td>
 
-                  <td className="px-3 py-2 border border-gray-200">
+                  <td className="px-3 py-2 border border-gray-200 text-gray-700">
                     {formatCurrency(p.buying_price)}
                   </td>
 

@@ -422,31 +422,31 @@ export default function InventoryReportPage() {
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Product
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Category
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Stock
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Buying Price
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Selling Price
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Inventory Value
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Sales Value
                 </th>
 
@@ -486,45 +486,45 @@ export default function InventoryReportPage() {
                         className="hover:bg-gray-50"
                       >
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {
                             product.name
                           }
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {product
                             .categories
                             ?.name ||
                             "Uncategorized"}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {
                             product.stock_quantity
                           }
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatCurrency(
                             product.buying_price
                           )}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatCurrency(
                             product.selling_price
                           )}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatCurrency(
                             product.stock_quantity *
                               product.buying_price
                           )}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatCurrency(
                             product.stock_quantity *
                               product.selling_price
@@ -538,29 +538,29 @@ export default function InventoryReportPage() {
                   {/* TOTAL */}
                   <tr className="bg-gray-50 font-bold">
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       TOTAL
                     </td>
 
-                    <td className="border border-gray-200"></td>
+                    <td className="border border-gray-200 text-gray-700"></td>
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       {
                         totals.stock
                       }
                     </td>
 
-                    <td className="border border-gray-200"></td>
+                    <td className="border border-gray-200 text-gray-700"></td>
 
-                    <td className="border border-gray-200"></td>
+                    <td className="border border-gray-200 text-gray-700"></td>
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       {formatCurrency(
                         totals.inventoryValue
                       )}
                     </td>
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       {formatCurrency(
                         totals.salesValue
                       )}

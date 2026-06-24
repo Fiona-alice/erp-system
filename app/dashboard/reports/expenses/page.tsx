@@ -326,7 +326,7 @@ export default function ExpenseReportPage() {
               e.target.value
             )
           }
-          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         {/* END DATE */}
@@ -338,7 +338,7 @@ export default function ExpenseReportPage() {
               e.target.value
             )
           }
-          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         {/* CLEAR */}
@@ -391,27 +391,27 @@ export default function ExpenseReportPage() {
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
 
-                <th className="px-3 py-2 text-left">
+                <th className="px-3 py-2 text-left text-gray-700">
                   Title
                 </th>
 
-                <th className="px-3 py-2 text-left">
+                <th className="px-3 py-2 text-left text-gray-700">
                   Category
                 </th>
 
-                <th className="px-3 py-2 text-left">
+                <th className="px-3 py-2 text-left text-gray-700">
                   Amount
                 </th>
 
-                <th className="px-3 py-2 text-left">
+                <th className="px-3 py-2 text-left text-gray-700">
                   Notes
                 </th>
 
-                <th className="px-3 py-2 text-left">
+                <th className="px-3 py-2 text-left text-gray-700">
                   Expense Date
                 </th>
 
-                <th className="px-3 py-2 text-left">
+                <th className="px-3 py-2 text-left text-gray-700">
                   Created
                 </th>
 
@@ -450,7 +450,7 @@ export default function ExpenseReportPage() {
                         }
                         className="border-t hover:bg-gray-50"
                       >
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2 text-gray-700">
                           {
                             expense.title
                           }
@@ -468,17 +468,17 @@ export default function ExpenseReportPage() {
                           )}
                         </td>
 
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2 text-gray-700">
                           {expense.notes}
                         </td>
 
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2 text-gray-700">
                           {formatDate(
                             expense.expense_date
                           )}
                         </td>
 
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2 text-gray-700">
                           {formatDate(
                             expense.created_at
                           )}
@@ -490,7 +490,7 @@ export default function ExpenseReportPage() {
                   {/* TOTAL ROW */}
                   <tr className="bg-gray-50 font-bold border-t">
 
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 text-gray-700">
                       TOTAL
                     </td>
 

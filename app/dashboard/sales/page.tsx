@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/formatDate";
 import { getBusinessId } from "@/lib/getBusinessId";
 import { logStockMovement } from "@/lib/logStockMovement";
 import { Search, X } from "lucide-react";
+import Select from "react-select";
 
 type Product = {
   id: number;
@@ -71,6 +72,7 @@ export default function SalesPage() {
   useState<any>(null);
 
   const [businessId, setBusinessId] = useState<string>("");
+  
 
    // GET BUSINESS ID
    async function loadBusiness() {
@@ -500,6 +502,15 @@ export default function SalesPage() {
         )
     );
 
+  const productOptions =
+  products.map(
+    (product) => ({
+      value: product.id,
+      label: `${product.name} (Stock: ${product.stock_quantity})`,
+      product,
+    })
+  );
+
   return (
     <div>
       {/* HEADER */}
@@ -739,57 +750,36 @@ export default function SalesPage() {
 
             <div className="space-y-3">
               {/* PRODUCT */}
-              <select
-                value={selectedProduct}
-                onChange={(e) => {
-                  const productId =
-                    e.target.value;
+              <Select
+  options={productOptions}
+  placeholder="Search product..."
+  isSearchable
+  value={
+    productOptions.find(
+      (p) =>
+        p.value ===
+        Number(
+          selectedProduct
+        )
+    ) || null
+  }
+  onChange={(selected) => {
+    if (!selected) return;
 
-                  setSelectedProduct(
-                    productId
-                  );
+    setSelectedProduct(
+      String(
+        selected.value
+      )
+    );
 
-                  const product =
-                    products.find(
-                      (p) =>
-                        p.id ===
-                        Number(
-                          productId
-                        )
-                    );
-
-                  if (product) {
-                    setSellingPrice(
-                      String(
-                        product.selling_price
-                      )
-                    );
-                  }
-                }}
-                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
-              >
-                <option value="">
-                  Select Product
-                </option>
-
-                {products.map(
-                  (product) => (
-                    <option
-                      key={product.id}
-                      value={
-                        product.id
-                      }
-                    >
-                      {product.name} (
-                      Stock:{" "}
-                      {
-                        product.stock_quantity
-                      }
-                      )
-                    </option>
-                  )
-                )}
-              </select>
+    setSellingPrice(
+      String(
+        selected.product
+          .selling_price
+      )
+    );
+  }}
+/>
 
               {/* QUANTITY */}
               <input

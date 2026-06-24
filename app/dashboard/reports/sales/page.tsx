@@ -459,7 +459,7 @@ const matchesCategory =
               e.target.value
             )
           }
-          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         {/* END DATE */}
@@ -471,7 +471,7 @@ const matchesCategory =
               e.target.value
             )
           }
-          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         {/* CLEAR */}
@@ -516,37 +516,37 @@ const matchesCategory =
       {/* TABLE */}
       <div className="bg-white border rounded-xl shadow overflow-hidden">
         <div className="overflow-x-auto">
-        <div className="max-h-[500px] overflow-y-auto">
+        <div className="max-h-[500px] overflow-y-auto"> 
 
           <table className="min-w-[900px] w-full text-sm border-collapse">
 
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Product
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Category
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Qty
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Sales
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Profit
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Margin %
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Date
                 </th>
               </tr>
@@ -586,7 +586,7 @@ const matchesCategory =
                         key={sale.id}
                         className="border-t hover:bg-gray-50"
                       >
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 text-gray-700 border border-gray-200">
                           {
                             sale.products
                               ?.name
@@ -600,13 +600,13 @@ const matchesCategory =
                             "Uncategorized"}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 text-gray-700 border border-gray-200">
                           {
                             sale.quantity
                           }
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 text-gray-700 border border-gray-200">
                           {formatCurrency(
                             sale.total_amount
                           )}
@@ -618,7 +618,7 @@ const matchesCategory =
                           )}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 text-gray-700 border border-gray-200">
                           {sale.total_amount > 0
                             ? (
                                 (sale.profit /
@@ -629,7 +629,7 @@ const matchesCategory =
                           %
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 text-gray-700 border border-gray-200">
                         {formatDate(sale.sale_date)}
                         </td>
                       </tr>
@@ -638,13 +638,13 @@ const matchesCategory =
 
                   {/* TOTAL ROW */}
                   <tr className="bg-gray-50 font-bold border-t">
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 text-gray-700 border border-gray-200">
                       TOTAL
                     </td>
 
                     <td></td>
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 text-gray-700 border border-gray-200">
                       {
                         totals.quantity
                       }
@@ -662,7 +662,7 @@ const matchesCategory =
                       )}
                     </td>
 
-                    <td className="px-3 py-2 border border-gray-200 font-bold">
+                    <td className="px-3 py-2 text-gray-700 border border-gray-200 font-bold">
                       {overallMargin}%
                     </td>
 

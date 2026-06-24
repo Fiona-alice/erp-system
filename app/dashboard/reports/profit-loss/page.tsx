@@ -748,7 +748,7 @@ export default function ProfitLossReportPage() {
               e.target.value
             )
           }
-         className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+         className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         <input
@@ -759,7 +759,7 @@ export default function ProfitLossReportPage() {
               e.target.value
             )
           }
-         className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+         className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         <button
@@ -796,11 +796,11 @@ export default function ProfitLossReportPage() {
         <table className="min-w-[900px] w-full text-sm border-collapse">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-3 py-2 text-left">
+              <th className="px-3 py-2 text-left text-gray-700">
                 Description
               </th>
 
-              <th className="px-3 py-2 text-left">
+              <th className="px-3 py-2 text-left text-gray-700">
                 Amount
               </th>
             </tr>
@@ -824,7 +824,7 @@ export default function ProfitLossReportPage() {
                       key={row.item}
                       className="border-t"
                     >
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 text-gray-700">
                         {row.item}
                       </td>
 
@@ -847,11 +847,11 @@ export default function ProfitLossReportPage() {
                 )}
 
                 <tr className="bg-gray-50">
-                  <td className="px-3 py-2 font-medium">
+                  <td className="px-3 py-2 font-medium text-gray-700">
                     Report Period
                   </td>
 
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 text-gray-700">
                     {startDate
                       ? formatDate(
                           startDate

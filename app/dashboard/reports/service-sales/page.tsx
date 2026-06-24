@@ -371,7 +371,7 @@ const overallServiceMargin =
               e.target.value
             )
           }
-          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         {/* END DATE */}
@@ -383,7 +383,7 @@ const overallServiceMargin =
               e.target.value
             )
           }
-          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
+          className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white appearance-none"
         />
 
         {/* CLEAR */}
@@ -434,27 +434,27 @@ const overallServiceMargin =
 
             <thead className="bg-gray-100 sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                  Service
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Qty
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Service Sales
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Profit
                 </th>
 
-                <th className="px-3 py-2 border border-gray-200">
+                <th className="px-3 py-2 border border-gray-200 text-gray-700">
                   Margin %
                 </th>
 
-                <th className="px-3 py-2 text-left border border-gray-200">
+                <th className="px-3 py-2 text-left border border-gray-200 text-gray-700">
                   Date
                 </th>
               </tr>
@@ -494,20 +494,20 @@ const overallServiceMargin =
                         key={serviceSale.id}
                         className="border-t hover:bg-gray-50"
                       >
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {
                             serviceSale.services
                               ?.name
                           }
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {
                             serviceSale.quantity
                           }
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {formatCurrency(
                             serviceSale.total_amount
                           )}
@@ -519,7 +519,7 @@ const overallServiceMargin =
                           )}
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                           {serviceSale.total_amount > 0
                             ? (
                                 (serviceSale.profit /
@@ -530,7 +530,7 @@ const overallServiceMargin =
                           %
                         </td>
 
-                        <td className="px-3 py-2 border border-gray-200">
+                        <td className="px-3 py-2 border border-gray-200 text-gray-700">
                         {formatDate(serviceSale.service_date)}
                         </td>
                       </tr>
@@ -539,13 +539,13 @@ const overallServiceMargin =
 
                   {/* TOTAL ROW */}
                   <tr className="bg-gray-50 font-bold border-t">
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       TOTAL
                     </td>
 
                  
 
-                    <td className="px-3 py-2 border border-gray-200">
+                    <td className="px-3 py-2 border border-gray-200 text-gray-700">
                       {
                         totals.quantity
                       }
@@ -563,7 +563,7 @@ const overallServiceMargin =
                       )}
                     </td>
                     
-                    <td className="px-3 py-2 border border-gray-200 font-bold">
+                    <td className="px-3 py-2 border border-gray-200 font-bold text-gray-700">
                       {overallServiceMargin}%
                     </td>
                     <td></td>
