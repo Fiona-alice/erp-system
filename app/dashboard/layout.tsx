@@ -135,8 +135,8 @@ export default function DashboardLayout({
  
   const navClass = (path: string) =>
   `flex items-center ${
-    open ? "justify-start gap-3 px-3" : "justify-center"
-  } py-3 rounded-lg transition ${
+    open ? "justify-start gap-2 px-3" : "justify-center"
+  } py-2 rounded-lg text-sm transition ${
     pathname === path
       ? "bg-blue-400 text-white"
       : "hover:bg-gray-500"
@@ -256,7 +256,7 @@ export default function DashboardLayout({
         href="/dashboard"
         className={navClass("/dashboard")}
        >
-        <LayoutDashboard size={20} />
+        <LayoutDashboard size={18} />
         {open && "Dashboard"}
       </Link>
 
@@ -264,7 +264,7 @@ export default function DashboardLayout({
         href="/dashboard/products"
        className={navClass("/dashboard/products")}
       >
-        <Package size={20} />
+        <Package size={18} />
         {open && "Products"}
       </Link>
 
@@ -274,7 +274,7 @@ export default function DashboardLayout({
             href="/dashboard/services"
             className={navClass("/dashboard/services")}
           >
-            <Sparkles size={20} />
+            <Sparkles size={18} />
             {open && "Services"}
           </Link>
           </>
@@ -284,7 +284,7 @@ export default function DashboardLayout({
         href="/dashboard/categories"
         className={navClass("/dashboard/categories")}
       >
-        <Layers size={20} />
+        <Layers size={18} />
         {open && "Categories"}
       </Link>
 
@@ -292,7 +292,7 @@ export default function DashboardLayout({
         href="/dashboard/sales"
         className={navClass("/dashboard/sales")}
       >
-        <ShoppingCart size={20} />
+        <ShoppingCart size={18} />
         {open && "Sales"}
       </Link>
 
@@ -302,7 +302,7 @@ export default function DashboardLayout({
             href="/dashboard/service-sales"
            className={navClass("/dashboard/service-sales")}
           >
-            <ShoppingCart size={20} />
+            <ShoppingCart size={18} />
             {open && "Service Sales"}
           </Link>
         </>
@@ -312,7 +312,7 @@ export default function DashboardLayout({
         href="/dashboard/purchases"
         className={navClass("/dashboard/purchases")}
       >
-        <Truck size={20} />
+        <Truck size={18} />
         {open && "Purchases"}
       </Link>
 
@@ -320,7 +320,7 @@ export default function DashboardLayout({
         href="/dashboard/rentals"
         className={navClass("/dashboard/rentals")}
       >
-        <HandCoins size={20} />
+        <HandCoins size={18} />
         {open && "Rentals"}
       </Link>
 
@@ -328,7 +328,7 @@ export default function DashboardLayout({
         href="/dashboard/customers"
         className={navClass("/dashboard/customers")}
       >
-        <Users size={20} />
+        <Users size={18} />
         {open && "Customers"}
       </Link>
 
@@ -336,7 +336,7 @@ export default function DashboardLayout({
         href="/dashboard/expenses"
         className={navClass("/dashboard/expenses")}
       >
-        <Receipt size={20} />
+        <Receipt size={18} />
         {open && "Expenses"}
       </Link>
 
@@ -344,7 +344,7 @@ export default function DashboardLayout({
         href="/dashboard/stock-adjustment"
         className={navClass("/dashboard/stock-adjustment")}
       >
-        <PenSquareIcon size={20} />
+        <PenSquareIcon size={18} />
         {open && "Stock Adjustment"}
       </Link>
 
@@ -352,7 +352,7 @@ export default function DashboardLayout({
         href="/dashboard/reports"
         className={navClass("/dashboard/reports")}
       >
-        <BarChart3 size={20} />
+        <BarChart3 size={18} />
         {open && "Reports"}
       </Link>
 
@@ -360,7 +360,7 @@ export default function DashboardLayout({
         href="/dashboard/users"
         className={navClass("/dashboard/users")}
       >
-        <Users size={20} />
+        <Users size={18} />
         {open && "Users"}
       </Link>
     </>
@@ -373,7 +373,7 @@ export default function DashboardLayout({
         href="/dashboard/products"
        className={navClass("/dashboard/products")}
             >
-        <Package size={20} />
+        <Package size={18} />
         {open && "Products"}
       </Link>
 
@@ -381,7 +381,7 @@ export default function DashboardLayout({
         href="/dashboard/sales"
         className={navClass("/dashboard/sales")}
       >
-        <ShoppingCart size={20} />
+        <ShoppingCart size={18} />
         {open && "Sales"}
       </Link>
 
@@ -389,7 +389,7 @@ export default function DashboardLayout({
         href="/dashboard/rentals"
        className={navClass("/dashboard/rentals")}
       >
-        <HandCoins size={20} />
+        <HandCoins size={18} />
         {open && "Rentals"}
       </Link>
 
@@ -397,7 +397,7 @@ export default function DashboardLayout({
         href="/dashboard/customers"
         className={navClass("/dashboard/customers")}
       >
-        <Users size={20} />
+        <Users size={18} />
         {open && "Customers"}
       </Link>
     </>

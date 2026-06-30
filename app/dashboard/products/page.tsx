@@ -27,6 +27,8 @@ type Product = {
     name: string;
     short_name: string;
   };
+  conversion_unit: string | null;
+  conversion_quantity: number | null;
 };
 
 type Category = {
@@ -83,6 +85,9 @@ export default function ProductsPage() {
   useState<Product | null>(null);
 
   const [unitId, setUnitId] = useState("");
+
+  const [conversionUnit, setConversionUnit] = useState("");
+  const [conversionQuantity, setConversionQuantity] = useState("");
 
   const [businessId, setBusinessId] = useState<string>("");
 
@@ -254,7 +259,7 @@ if (!profile?.business_id) {
           business_id:
           profile.business_id,
           name,
-          category_id:
+          category_id: 
           selectedCategory
           ? Number(selectedCategory)
           : null,
@@ -263,6 +268,8 @@ if (!profile?.business_id) {
           stock_quantity: Number(stockQuantity),
           unit_id: Number(unitId),
           minimum_stock: Number(minimumStock),
+          conversion_unit: conversionUnit,
+          conversion_quantity: Number(conversionQuantity),
         },
       ]);
 
@@ -316,7 +323,9 @@ if (!profile?.business_id) {
     setMinimumStock(
     product.minimum_stock?.toString() || ""
       );
-
+    setUnitId(product.unit_id ? String(product.unit_id) : "");
+    setConversionUnit(product.conversion_unit || "");
+    setConversionQuantity(product.conversion_quantity?.toString() || "");
     setIsOpen(true);
   }
 
@@ -341,6 +350,8 @@ if (!profile?.business_id) {
         stock_quantity: Number(stockQuantity),
         unit_id: Number(unitId),
         minimum_stock: Number(minimumStock),
+        conversion_unit: conversionUnit,
+        conversion_quantity: Number(conversionQuantity),
       })
       .eq("id", editingProduct.id)
       .eq("business_id", businessId);
@@ -414,7 +425,11 @@ if (!profile?.business_id) {
     setBuyingPrice("");
     setSellingPrice("");
     setStockQuantity("");
-  }
+    setMinimumStock("");
+    setUnitId("");
+    setConversionUnit("");
+    setConversionQuantity("");
+    }
 
   // FILTER PRODUCTS
   const filteredProducts = products.filter(
@@ -882,6 +897,31 @@ if (!profile?.business_id) {
                   </option>
                 ))}
               </select>
+
+<select
+  value={conversionUnit}
+  onChange={(e) => setConversionUnit(e.target.value)}
+  className="w-full border p-3 rounded-lg"
+>
+  <option value="">Select Conversion Unit</option>
+
+  {units.map((unit: any) => (
+    <option key={unit.id} value={unit.id}>
+      {unit.name} ({unit.short_name})
+    </option>
+  ))}
+</select>
+
+<input
+  type="number"
+  step="0.01"
+  placeholder="e.g. 20"
+  value={conversionQuantity}
+  onChange={(e) =>
+    setConversionQuantity(e.target.value)
+  }
+  className="w-full border p-3 rounded-lg"
+/>
 
              <input
                 type="number"

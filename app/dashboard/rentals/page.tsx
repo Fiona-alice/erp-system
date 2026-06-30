@@ -8,7 +8,7 @@ import { formatDate } from "@/lib/formatDate";
 import { getBusinessId } from "@/lib/getBusinessId";
 import { logStockMovement } from "@/lib/logStockMovement";
 import { Search, X } from "lucide-react";
-
+import Select from "react-select";
 
 type Customer = {
   id: number;
@@ -655,6 +655,15 @@ export default function RentalsPage() {
 
 });
 
+const productOptions =
+  products.map(
+    (product) => ({
+      value: product.id,
+      label: `${product.name} (Stock: ${product.stock_quantity})`,
+      product,
+    })
+  );
+
   return (
     <div>
       {/* HEADER */}
@@ -1039,43 +1048,30 @@ export default function RentalsPage() {
               </select>
 
               {/* PRODUCT */}
-              <select
-                value={
-                  selectedProduct
-                }
-                onChange={(e) =>
-                  setSelectedProduct(
-                    e.target.value
-                  )
-                }
-                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
-              >
-                <option value="">
-                  Select Product
-                </option>
+              <Select
+                  options={productOptions}
+                  placeholder="Search product..."
+                  isSearchable
+                  value={
+                    productOptions.find(
+                      (p) =>
+                        p.value ===
+                        Number(
+                          selectedProduct
+                        )
+                    ) || null
+                  }
+                  onChange={(selected) => {
+                    if (!selected) return;
 
-                {products.map(
-                  (product) => (
-                    <option
-                      key={
-                        product.id
-                      }
-                      value={
-                        product.id
-                      }
-                    >
-                      {
-                        product.name
-                      }{" "}
-                      (Stock:{" "}
-                      {
-                        product.stock_quantity
-                      }
+                    setSelectedProduct(
+                      String(
+                        selected.value
                       )
-                    </option>
-                  )
-                )}
-              </select>
+                    );
+                  }}
+                  className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
+                />
 
               {/* QUANTITY */}
               <input

@@ -16,12 +16,16 @@ type Product = {
   stock_quantity: number;
   buying_price: number;
   selling_price: number;
+  conversion_unit: string | null;
+  conversion_quantity: number | null;
 };
 
 type Sale = {
   id: number;
   product_id: number;
   quantity: number;
+  quantity_in_base_unit: number | null;
+  unit_used: string | null;
   selling_price: number;
   total_amount: number;
   cost_amount: number;
@@ -72,8 +76,9 @@ export default function SalesPage() {
   useState<any>(null);
 
   const [businessId, setBusinessId] = useState<string>("");
-  
 
+  const [saleUnitMode, setSaleUnitMode] = useState<"base" | "conversion">("base");
+  
    // GET BUSINESS ID
    async function loadBusiness() {
     const id = await getBusinessId();
@@ -193,12 +198,10 @@ export default function SalesPage() {
   // CLEAR FORM
   function clearForm() {
     setSelectedProduct("");
-
     setQuantity("");
-
     setSellingPrice("");
-
     setSaleDate("");
+    setSaleUnitMode("base");
   }
 
   // SAVE SALE
@@ -226,7 +229,12 @@ export default function SalesPage() {
     if (!product) return;
 
     // CHECK STOCK
-    if (qty > product.stock_quantity) {
+    const qtyInBaseUnit =
+    saleUnitMode === "conversion" && product.conversion_quantity
+      ? qty * product.conversion_quantity
+      : qty;
+
+    if (qtyInBaseUnit > product.stock_quantity) {
       alert("Not enough stock");
 
       return;
@@ -238,7 +246,7 @@ export default function SalesPage() {
 
       // COST OF GOODS SOLD (COGS)
     const costAmount =
-       product.buying_price * qty;
+       product.buying_price * qtyInBaseUnit;
 
     // PROFIT
     const profit =
@@ -246,7 +254,7 @@ export default function SalesPage() {
 
     // NEW STOCK
     const newStock =
-      product.stock_quantity - qty;
+      product.stock_quantity - qtyInBaseUnit;
 
     // SAVE SALE
     const businessId = await getBusinessId();
@@ -260,7 +268,8 @@ export default function SalesPage() {
             Number(selectedProduct),
 
           quantity: qty,
-
+          quantity_in_base_unit: qtyInBaseUnit,
+          unit_used: saleUnitMode === "conversion" ? product.conversion_unit : "base",
           selling_price:
             finalSellingPrice,
 
@@ -300,7 +309,7 @@ export default function SalesPage() {
       await logStockMovement(
       Number(selectedProduct),
       "sale",
-      -qty
+      -qtyInBaseUnit
       );
       
     clearForm();
@@ -328,7 +337,7 @@ export default function SalesPage() {
     setSaleDate(
       sale.sale_date || ""
     );
-
+    setSaleUnitMode(sale.unit_used === "base" || !sale.unit_used ? "base" : "conversion");
     setIsOpen(true);
   }
 
@@ -354,12 +363,18 @@ export default function SalesPage() {
     if (!product) return;
 
     // REVERSE OLD STOCK
-    const reversedStock =
-      product.stock_quantity +
-      editingSale.quantity;
+
+const oldQtyInBaseUnit = editingSale.quantity_in_base_unit ?? editingSale.quantity;
+
+  const newQtyInBaseUnit =
+    saleUnitMode === "conversion" && product.conversion_quantity
+      ? qty * product.conversion_quantity
+      : qty;
+
+    const reversedStock = product.stock_quantity + oldQtyInBaseUnit;
 
     // CHECK STOCK
-    if (qty > reversedStock) {
+    if (newQtyInBaseUnit > reversedStock) {
       alert("Not enough stock");
 
       return;
@@ -367,7 +382,7 @@ export default function SalesPage() {
 
     // FINAL STOCK
     const finalStock =
-      reversedStock - qty;
+      reversedStock - newQtyInBaseUnit;
 
     // TOTAL
     const total =
@@ -375,7 +390,7 @@ export default function SalesPage() {
 
     // COST OF GOODS SOLD
     const costAmount =
-        product.buying_price * qty;  
+        product.buying_price * newQtyInBaseUnit;  
 
     // PROFIT
     const profit =
@@ -386,7 +401,8 @@ export default function SalesPage() {
       .from("sales")
       .update({
         quantity: qty,
-
+        quantity_in_base_unit: newQtyInBaseUnit,
+        unit_used: saleUnitMode === "conversion" ? product.conversion_unit : "base",
         selling_price:
           finalSellingPrice,
 
@@ -451,9 +467,8 @@ export default function SalesPage() {
     if (!product) return;
 
     // RESTORE STOCK
-    const restoredStock =
-      product.stock_quantity +
-      sale.quantity;
+    const restoreQty = sale.quantity_in_base_unit ?? sale.quantity;
+    const restoredStock = product.stock_quantity + restoreQty;
 
     // UPDATE PRODUCT
     const { error: stockError } =
@@ -486,9 +501,7 @@ export default function SalesPage() {
     }
 
     setSelectedSale(null);
-
     fetchProducts();
-
     fetchSales();
   }
 
@@ -511,6 +524,9 @@ export default function SalesPage() {
     })
   );
 
+  const selectedProductObj = products.find(p => p.id === Number(selectedProduct));
+  const hasConversion = !!(selectedProductObj?.conversion_unit && selectedProductObj?.conversion_quantity);
+  
   return (
     <div>
       {/* HEADER */}
@@ -749,37 +765,40 @@ export default function SalesPage() {
             </Dialog.Title>
 
             <div className="space-y-3">
+
               {/* PRODUCT */}
               <Select
-  options={productOptions}
-  placeholder="Search product..."
-  isSearchable
-  value={
-    productOptions.find(
-      (p) =>
-        p.value ===
-        Number(
-          selectedProduct
-        )
-    ) || null
-  }
-  onChange={(selected) => {
-    if (!selected) return;
+                options={productOptions}
+                placeholder="Search product..."
+                isSearchable
+                value={
+                  productOptions.find(
+                    (p) =>
+                      p.value ===
+                      Number(
+                        selectedProduct
+                      )
+                  ) || null
+                }
+                onChange={(selected) => {
+                  if (!selected) return;
 
-    setSelectedProduct(
-      String(
-        selected.value
-      )
-    );
+                  setSelectedProduct(
+                    String(
+                      selected.value
+                    )
+                  );
 
-    setSellingPrice(
-      String(
-        selected.product
-          .selling_price
-      )
-    );
-  }}
-/>
+                  setSellingPrice(
+                    String(
+                      selected.product
+                        .selling_price
+                    )
+                  );
+                  setSaleUnitMode("base");
+                }}
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
+              />
 
               {/* QUANTITY */}
               <input
@@ -793,7 +812,28 @@ export default function SalesPage() {
                 }
                 className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
-
+{hasConversion && (
+  <div className="flex gap-2">
+    <button
+      type="button"
+      className={`flex-1 border rounded-lg py-2 text-sm ${
+        saleUnitMode === "base" ? "bg-blue-50 border-blue-400" : ""
+      }`}
+      onClick={() => setSaleUnitMode("base")}
+    >
+      Sell in base unit
+    </button>
+    <button
+      type="button"
+      className={`flex-1 border rounded-lg py-2 text-sm ${
+        saleUnitMode === "conversion" ? "bg-blue-50 border-blue-400" : ""
+      }`}
+      onClick={() => setSaleUnitMode("conversion")}
+    >
+      Sell in {selectedProductObj?.conversion_unit}
+    </button>
+  </div>
+)}
               {/* SELLING PRICE */}
               <input
                 type="number"

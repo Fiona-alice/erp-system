@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/formatDate";
 import { getBusinessId } from "@/lib/getBusinessId";
 import { logStockMovement } from "@/lib/logStockMovement";
 import { Search, X } from "lucide-react";
+import Select from "react-select";
 
 type Product = {
   id: number;
@@ -579,6 +580,14 @@ export default function PurchasesPage() {
           )
     );
 
+  const productOptions =
+  products.map(
+    (product) => ({
+      value: product.id,
+      label: product.name,
+    })
+  );
+
   return (
     <div>
       {/* HEADER */}
@@ -816,40 +825,30 @@ export default function PurchasesPage() {
             <div className="space-y-3">
 
               {/* PRODUCT */}
-              <select
+              <Select
+                options={productOptions}
+                placeholder="Search product..."
+                isSearchable
                 value={
-                  selectedProduct
+                  productOptions.find(
+                    (p) =>
+                      p.value ===
+                      Number(
+                        selectedProduct
+                      )
+                  ) || null
                 }
-                onChange={(e) =>
+                onChange={(selected) => {
+                  if (!selected) return;
+
                   setSelectedProduct(
-                    e.target.value
-                  )
-                }
+                    String(
+                      selected.value
+                    )
+                  );
+                }}
                 className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
-              >
-
-                <option value="">
-                  Select Product
-                </option>
-
-                {products.map(
-                  (product) => (
-                    <option
-                      key={
-                        product.id
-                      }
-                      value={
-                        product.id
-                      }
-                    >
-                      {
-                        product.name
-                      }
-                    </option>
-                  )
-                )}
-
-              </select>
+              />
 
               {/* QUANTITY */}
               <input
