@@ -776,7 +776,7 @@ if (!profile?.business_id) {
                 : "text-green-600"
                  }`}
                 >
-                {product.stock_quantity}
+                {Number(product.stock_quantity).toFixed(2)}
               </span>
             </td>
             <td className="px-3 p-2 text-gray-700 border border-gray-200">
@@ -891,7 +891,7 @@ if (!profile?.business_id) {
                 {units.map((unit: any) => (
                   <option
                     key={unit.id}
-                    value={unit.id}
+                    value={unit.name}
                   >
                     {unit.name} ({unit.short_name})
                   </option>

@@ -364,7 +364,7 @@ export default function SalesPage() {
 
     // REVERSE OLD STOCK
 
-const oldQtyInBaseUnit = editingSale.quantity_in_base_unit ?? editingSale.quantity;
+  const oldQtyInBaseUnit = editingSale.quantity_in_base_unit ?? editingSale.quantity;
 
   const newQtyInBaseUnit =
     saleUnitMode === "conversion" && product.conversion_quantity
@@ -695,7 +695,10 @@ const oldQtyInBaseUnit = editingSale.quantity_in_base_unit ?? editingSale.quanti
                     </td>
 
                     <td className="px-3 p-2 text-gray-700 border border-gray-200">
-                      {sale.quantity} {sale.products?.units?.short_name}
+                      {sale.quantity}{" "}
+                      {sale.unit_used && sale.unit_used !== "base"
+                        ? sale.unit_used
+                        : sale.products?.units?.short_name}
                     </td>
 
                     <td className="px-3 p-2 text-gray-700 border border-gray-200">
@@ -833,7 +836,7 @@ const oldQtyInBaseUnit = editingSale.quantity_in_base_unit ?? editingSale.quanti
       Sell in {selectedProductObj?.conversion_unit}
     </button>
   </div>
-)}
+)} 
               {/* SELLING PRICE */}
               <input
                 type="number"

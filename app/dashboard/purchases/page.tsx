@@ -15,12 +15,16 @@ type Product = {
   name: string;
   stock_quantity: number;
   buying_price: number;
+  conversion_unit: string | null;
+  conversion_quantity: number | null;
 };
 
 type Purchase = {
   id: number;
   product_id: number;
   quantity: number;
+  quantity_in_base_unit: number | null;
+  unit_used: string | null;
   buying_price: number;
   total_amount: number;
   purchase_date: string;
@@ -73,6 +77,8 @@ export default function PurchasesPage() {
 
   const [purchaseDate, setPurchaseDate] =
     useState("");
+
+  const [purchaseUnitMode, setPurchaseUnitMode] = useState<"base" | "conversion">("base");  
   
   const [businessId, setBusinessId] = useState<string>("");
 
@@ -151,70 +157,49 @@ export default function PurchasesPage() {
     setShippingCost("");
     setOtherCost("");
     setPurchaseDate("");
+    setPurchaseUnitMode("base");
   }
 
   /* SAVE PURCHASE */
 
   async function savePurchase() {
-    const qty =
-      Number(quantity);
+ 
+    const qty = Number(quantity);
 
-    const invoice =
-      Number(invoiceAmount);
+    const invoice = Number(invoiceAmount);
 
-    const shipping =
-      Number(shippingCost || 0);
+    const shipping = Number(shippingCost || 0);
 
-    const other =
-      Number(otherCost || 0);
+    const other = Number(otherCost || 0);
 
-    const total =
-      invoice +
-      shipping +
-      other;
+    const total = invoice + shipping + other;
 
-    if (
-      !selectedProduct ||
-      qty <= 0 ||
-      total <= 0
-    ) {
+    if (!selectedProduct || qty <= 0 || total <= 0) {
       alert("Fill all fields");
       return;
     }
 
-    const unitCost =
-      total / qty;
-
-    const product =
-      products.find(
-        (p) =>
-          p.id ===
-          Number(selectedProduct)
-      );
-
+    const product = products.find((p) => p.id === Number(selectedProduct));
     if (!product) return;
 
-    /*
-      CURRENT INVENTORY VALUE
-    */
+    const qtyInBaseUnit =
+    purchaseUnitMode === "conversion" && product.conversion_quantity
+      ? qty * product.conversion_quantity
+      : qty;
 
-    const currentInventoryValue =
-      product.stock_quantity *
-      product.buying_price;
+    const unitCost = total / qtyInBaseUnit;
+    
+    /* CURRENT INVENTORY VALUE */
+
+    const currentInventoryValue = product.stock_quantity * product.buying_price;
 
     /* NEW STOCK */
 
-    const newStock =
-      product.stock_quantity +
-      qty;
+    const newStock = product.stock_quantity + qtyInBaseUnit;
 
     /* NEW AVG COST */
 
-    const newAverageCost =
-      (
-        currentInventoryValue +
-        total
-      ) / newStock;
+    const newAverageCost = (currentInventoryValue + total) / newStock;
 
     /* SAVE PURCHASE */
     const businessId = await getBusinessId();
@@ -224,23 +209,13 @@ export default function PurchasesPage() {
         .insert([
           {
             business_id: businessId,
-            product_id:
-              Number(
-                selectedProduct
-              ),
-
+            product_id: Number(selectedProduct),
             quantity: qty,
-
-            buying_price:
-              Number(
-                unitCost.toFixed(2)
-              ),
-
-            total_amount:
-              total,
-
-            purchase_date:
-              purchaseDate,
+            quantity_in_base_unit: qtyInBaseUnit,
+            unit_used: purchaseUnitMode === "conversion" ? product.conversion_unit : "base",
+            buying_price: Number(unitCost.toFixed(2)),
+            total_amount: total,
+            purchase_date: purchaseDate,
           },
         ]);
 
@@ -305,36 +280,23 @@ export default function PurchasesPage() {
   */
 
   function openEditModal(
-    purchase: Purchase
-  ) {
-    setEditingPurchase(
-      purchase
-    );
+    purchase: Purchase) {
+    setEditingPurchase(purchase);
 
-    setSelectedProduct(
-      String(
-        purchase.product_id
-      )
-    );
+    setSelectedProduct(String(purchase.product_id));
 
-    setQuantity(
-      String(
-        purchase.quantity
-      )
-    );
+    setQuantity(String(purchase.quantity));
 
-    setInvoiceAmount(
-      String(
-        purchase.total_amount
-      )
-    );
+    setInvoiceAmount(String(purchase.total_amount));
 
     setShippingCost("");
 
     setOtherCost("");
 
-    setPurchaseDate(
-      purchase.purchase_date
+    setPurchaseDate(purchase.purchase_date);
+
+    setPurchaseUnitMode(
+    purchase.unit_used === "base" || !purchase.unit_used ? "base" : "conversion"
     );
 
     setIsOpen(true);
@@ -347,83 +309,57 @@ export default function PurchasesPage() {
   async function updatePurchase() {
     if (!editingPurchase) return;
 
-    const qty =
-      Number(quantity);
+    const qty = Number(quantity);
 
-    const invoice =
-      Number(invoiceAmount);
+    const invoice = Number(invoiceAmount);
 
-    const shipping =
-      Number(shippingCost || 0);
+    const shipping = Number(shippingCost || 0);
 
-    const other =
-      Number(otherCost || 0);
+    const other = Number(otherCost || 0);
 
-    const total =
-      invoice +
-      shipping +
-      other;
+    const total = invoice + shipping + other;
 
-    const unitCost =
-      total / qty;
+    /* FIND PRODUCT */
 
-    /*
-      FIND PRODUCT
-    */
-
-    const product =
-      products.find(
-        (p) =>
-          p.id ===
-          Number(
-            selectedProduct
-          )
-      );
+    const product = products.find((p) => p.id === Number(selectedProduct));
 
     if (!product) return;
 
+    const newQtyInBaseUnit =
+    purchaseUnitMode === "conversion" && product.conversion_quantity
+      ? qty * product.conversion_quantity
+      : qty;
+
+    const unitCost = total / newQtyInBaseUnit;
     /*
       REVERSE OLD PURCHASE
     */
+    const oldQtyInBaseUnit = Number(
+    editingPurchase.quantity_in_base_unit ?? editingPurchase.quantity
+  );
+    const stockBeforeEdit = product.stock_quantity - editingPurchase.quantity;
 
-    const stockBeforeEdit =
-      product.stock_quantity -
-      editingPurchase.quantity;
+    const inventoryValueBeforeEdit = stockBeforeEdit * product.buying_price;
 
-    const inventoryValueBeforeEdit =
-      stockBeforeEdit *
-      product.buying_price;
+    /* APPLY NEW PURCHASE */
 
-    /*
-      APPLY NEW PURCHASE
-    */
+    const finalStock = stockBeforeEdit + oldQtyInBaseUnit;
 
-    const finalStock =
-      stockBeforeEdit +
-      qty;
+    const finalInventoryValue = inventoryValueBeforeEdit + total;
 
-    const finalInventoryValue =
-      inventoryValueBeforeEdit +
-      total;
+    /* NEW AVG COST */
 
-    /*
-      NEW AVG COST
-    */
+    const newAverageCost = finalInventoryValue / finalStock;
 
-    const newAverageCost =
-      finalInventoryValue /
-      finalStock;
-
-    /*
-      UPDATE PURCHASE
-    */
+    /* UPDATE PURCHASE */
 
     const { error } =
       await supabase
         .from("purchases")
         .update({
           quantity: qty,
-
+        quantity_in_base_unit: newQtyInBaseUnit,
+        unit_used: purchaseUnitMode === "conversion" ? product.conversion_unit : "base",
           buying_price:
             Number(
               unitCost.toFixed(2)
@@ -479,23 +415,15 @@ export default function PurchasesPage() {
     }
 
     clearForm();
-
     setEditingPurchase(null);
-
     setIsOpen(false);
-
     fetchProducts();
-
     fetchPurchases();
   }
 
-  /*
-    DELETE PURCHASE
-  */
+  /*  DELETE PURCHASE */
 
-  async function deletePurchase(
-    purchase: Purchase
-  ) {
+  async function deletePurchase(purchase: Purchase) {
     const confirmDelete =
       confirm(
         "Delete this purchase?"
@@ -503,26 +431,14 @@ export default function PurchasesPage() {
 
     if (!confirmDelete) return;
 
-    const product =
-      products.find(
-        (p) =>
-          p.id ===
-          purchase.product_id
-      );
-
+    const product = products.find((p) =>  p.id === purchase.product_id);
     if (!product) return;
 
-    /*
-      REVERSE STOCK
-    */
+    /*  REVERSE STOCK */
+    const restoreQty = Number(purchase.quantity_in_base_unit ?? purchase.quantity);
+    const newStock = product.stock_quantity - restoreQty;
 
-    const newStock =
-      product.stock_quantity -
-      purchase.quantity;
-
-    /*
-      UPDATE PRODUCT
-    */
+    /*  UPDATE PRODUCT */
 
     const {
       error: stockError,
@@ -587,8 +503,10 @@ export default function PurchasesPage() {
       label: product.name,
     })
   );
+const selectedProductObj = products.find(p => p.id === Number(selectedProduct));
+const hasConversion = !!(selectedProductObj?.conversion_unit && selectedProductObj?.conversion_quantity);
 
-  return (
+return (
     <div>
       {/* HEADER */}
       <div className="mb-4">
@@ -765,7 +683,10 @@ export default function PurchasesPage() {
                     </td>
 
                     <td className="px-3 p-2 text-gray-700 border border-gray-200">
-                      {purchase.quantity} {purchase.products?.units?.short_name}
+                      {purchase.quantity}{" "}
+                      {purchase.unit_used && purchase.unit_used !== "base"
+                        ? purchase.unit_used
+                        : purchase.products?.units?.short_name}
                     </td>
 
                     <td className="px-3 p-2 text-gray-700 border border-gray-200">
@@ -846,6 +767,7 @@ export default function PurchasesPage() {
                       selected.value
                     )
                   );
+                  setPurchaseUnitMode("base");
                 }}
                 className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
@@ -862,6 +784,29 @@ export default function PurchasesPage() {
                 }
                 className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
+
+{hasConversion && (
+  <div className="flex gap-2">
+    <button
+      type="button"
+      className={`flex-1 border rounded-lg py-2 text-sm ${
+        purchaseUnitMode === "base" ? "bg-blue-50 border-blue-400" : ""
+      }`}
+      onClick={() => setPurchaseUnitMode("base")}
+    >
+      Buy in base unit
+    </button>
+    <button
+      type="button"
+      className={`flex-1 border rounded-lg py-2 text-sm ${
+        purchaseUnitMode === "conversion" ? "bg-blue-50 border-blue-400" : ""
+      }`}
+      onClick={() => setPurchaseUnitMode("conversion")}
+    >
+      Buy in {selectedProductObj?.conversion_unit}
+    </button>
+  </div>
+)}
 
               {/* INVOICE */}
               <input

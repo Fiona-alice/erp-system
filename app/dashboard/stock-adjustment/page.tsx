@@ -8,12 +8,15 @@ import { formatDate } from "@/lib/formatDate";
 import { getBusinessId } from "@/lib/getBusinessId";
 import { logStockMovement } from "@/lib/logStockMovement";
 import { Search, X } from "lucide-react";
+import Select from "react-select";
 
 type Product = {
   id: number;
   name: string;
   stock_quantity: number;
   buying_price: number;
+  conversion_unit: string | null;
+  conversion_quantity: number | null;
 };
 
 type Adjustment = {
@@ -21,6 +24,8 @@ type Adjustment = {
   product_id: number;
   type: "IN" | "OUT";
   quantity: number;
+  quantity_in_base_unit: number | null;
+  unit_used: string | null;
   unit_cost: number;
   total_cost: number;
   pnl_amount: number;
@@ -29,6 +34,9 @@ type Adjustment = {
 
   products?: {
     name: string;
+    units?: {
+      short_name: string;
+    };
   } | null;
 };
 
@@ -90,6 +98,8 @@ export default function StockAdjustmentPage() {
 
   const [businessId, setBusinessId] = useState<string>("");
 
+  const [adjUnitMode, setAdjUnitMode] = useState<"base" | "conversion">("base");
+
    // GET BUSINESS ID
    async function loadBusiness() {
     const id = await getBusinessId();
@@ -107,7 +117,9 @@ export default function StockAdjustmentPage() {
           id,
           name,
           stock_quantity,
-          buying_price
+          buying_price,
+          conversion_unit,
+          conversion_quantity
         `)
         .eq("business_id", businessId) 
         .order("name");
@@ -131,7 +143,8 @@ export default function StockAdjustmentPage() {
         .from("stock_adjustments")
         .select(`
           *,
-          products(name)
+          products(name,
+          units(short_name))
         `)
         .eq("business_id", businessId)
         .order("created_at", {
@@ -234,16 +247,17 @@ export default function StockAdjustmentPage() {
 
     setReason(adjustment.reason);
 
+    setAdjUnitMode(
+    adjustment.unit_used === "base" || !adjustment.unit_used ? "base" : "conversion"
+  );
+
     setIsOpen(true);
   }
 
   // SAVE ADJUSTMENT
   async function saveAdjustment() {
     if (
-      !productId ||
-      !quantity ||
-      !unitCost ||
-      !reason
+      !productId || !quantity || !unitCost || !reason
     ) {
       alert("Fill all fields");
       return;
@@ -253,27 +267,35 @@ export default function StockAdjustmentPage() {
 
     const cost = Number(unitCost);
 
-    const total = qty * cost;
-
-    const product = products.find(
-      (p) => p.id === Number(productId)
-    );
-
+    const product = products.find((p) => p.id === Number(productId));
     if (!product) return;
+
+    const qtyInBaseUnit =
+    adjUnitMode === "conversion" && product.conversion_quantity
+      ? qty * product.conversion_quantity
+      : qty;
+
+    const total = qtyInBaseUnit * cost;
+    const pnl = type === "OUT" ? -total : total;
 
     // EDIT MODE
     if (editingAdjustment) {
+
+      const oldQtyInBaseUnit = Number(
+      editingAdjustment.quantity_in_base_unit ?? editingAdjustment.quantity
+    );
+
       let revertedStock =
         editingAdjustment.type === "IN"
           ? product.stock_quantity -
-            editingAdjustment.quantity
+            oldQtyInBaseUnit
           : product.stock_quantity +
-            editingAdjustment.quantity;
+            oldQtyInBaseUnit;
 
       let finalStock =
         type === "IN"
-          ? revertedStock + qty
-          : revertedStock - qty;
+          ? revertedStock + qtyInBaseUnit
+          : revertedStock - qtyInBaseUnit;
 
       if (finalStock < 0) {
         alert(
@@ -289,6 +311,8 @@ export default function StockAdjustmentPage() {
           product_id: Number(productId),
           type,
           quantity: qty,
+          quantity_in_base_unit: qtyInBaseUnit,
+          unit_used: adjUnitMode === "conversion" ? product.conversion_unit : "base",
           unit_cost: cost,
           total_cost: total,
 
@@ -327,8 +351,8 @@ export default function StockAdjustmentPage() {
     else {
       const newStock =
         type === "IN"
-          ? product.stock_quantity + qty
-          : product.stock_quantity - qty;
+          ? product.stock_quantity + qtyInBaseUnit
+          : product.stock_quantity - qtyInBaseUnit;
 
       if (newStock < 0) {
         alert(
@@ -347,6 +371,8 @@ export default function StockAdjustmentPage() {
             product_id: Number(productId),
             type,
             quantity: qty,
+            quantity_in_base_unit: qtyInBaseUnit,
+            unit_used: adjUnitMode === "conversion" ? product.conversion_unit : "base",
             unit_cost: cost,
             total_cost: total,
             pnl_amount:
@@ -381,19 +407,17 @@ export default function StockAdjustmentPage() {
       await logStockMovement(
         product.id,
         "adjustment",
-        Number(quantity),
+        qtyInBaseUnit,
         undefined,
         "Manual stock adjustment"
       );
       
     clearForm();
-
     setEditingAdjustment(null);
-
     setIsOpen(false);
-
     fetchProducts();
     fetchAdjustments();
+    setAdjUnitMode("base");
   }
 
   // DELETE ADJUSTMENT
@@ -413,13 +437,17 @@ export default function StockAdjustmentPage() {
 
     if (!product) return;
 
+    const qtyInBaseUnit = Number(
+    adjustment.quantity_in_base_unit ?? adjustment.quantity
+  );
+
     // REVERSE STOCK
     const reversedStock =
       adjustment.type === "IN"
         ? product.stock_quantity -
-          adjustment.quantity
+          qtyInBaseUnit
         : product.stock_quantity +
-          adjustment.quantity;
+          qtyInBaseUnit;
 
     // UPDATE PRODUCT
     const { error: stockError } =
@@ -459,6 +487,18 @@ export default function StockAdjustmentPage() {
     type === "IN"
       ? gainReasons
       : lossReasons;
+
+  const selectedProductObj = products.find(p => p.id === Number(productId));
+  const hasConversion = !!(selectedProductObj?.conversion_unit && selectedProductObj?.conversion_quantity);
+     
+  const productOptions =
+  products.map(
+    (product) => ({
+      value: product.id,
+      label: `${product.name} (Stock: ${product.stock_quantity})`,
+      product,
+    })
+  );
 
   return (
     <div>
@@ -633,9 +673,10 @@ export default function StockAdjustmentPage() {
                     </td>
 
                     <td className="px-3 p-2 border border-gray-200">
-                      {
-                        adjustment.quantity
-                      }
+                      {adjustment.quantity}{" "}
+                      {adjustment.unit_used && adjustment.unit_used !== "base"
+                        ? adjustment.unit_used
+                        : adjustment.products?.units?.short_name}
                     </td>
 
                     <td className="px-3 p-2 border border-gray-200">
@@ -701,29 +742,27 @@ export default function StockAdjustmentPage() {
 
             <div className="space-y-4">
               {/* PRODUCT */}
-              <select
-                value={productId}
-                onChange={(e) =>
-                  setProductId(
-                    e.target.value
-                  )
-                }
-                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
-              >
-                <option value="">
-                  Select Product
-                </option>
+              <Select
+                  options={productOptions}
+                  placeholder="Search product..."
+                  isSearchable
+                  value={
+                    productOptions.find(
+                      (p) =>
+                        p.value ===
+                        Number(productId)
+                    ) || null
+                  }
+                  onChange={(selected) => {
+                    if (!selected) return;
 
-                {products.map((p) => (
-                  <option
-                    key={p.id}
-                    value={p.id}
-                  >
-                    {p.name} (Stock:{" "}
-                    {p.stock_quantity})
-                  </option>
-                ))}
-              </select>
+                    setProductId(
+                      String(selected.value)
+                    );
+                    setAdjUnitMode("base");
+                  }}
+                className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"  
+                />
 
               {/* TYPE */}
               <select
@@ -785,6 +824,29 @@ export default function StockAdjustmentPage() {
                 }
                 className=" w-full border rounded-lg px-3 py-3 text-base text-gray-900"
               />
+
+{hasConversion && (
+  <div className="flex gap-2">
+    <button
+      type="button"
+      className={`flex-1 border rounded-lg py-2 text-sm ${
+        adjUnitMode === "base" ? "bg-blue-50 border-blue-400" : ""
+      }`}
+      onClick={() => setAdjUnitMode("base")}
+    >
+      Adjust in base unit
+    </button>
+    <button
+      type="button"
+      className={`flex-1 border rounded-lg py-2 text-sm ${
+        adjUnitMode === "conversion" ? "bg-blue-50 border-blue-400" : ""
+      }`}
+      onClick={() => setAdjUnitMode("conversion")}
+    >
+      Adjust in {selectedProductObj?.conversion_unit}
+    </button>
+  </div>
+)}
 
               {/* UNIT COST */}
               <input
